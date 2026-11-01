@@ -1,0 +1,1 @@
+{"name":"auto-empire-tycoon","private":true,"version":"6.0.0","scripts":{"test":"node tests/smoke.cjs"},"devDependencies":{"playwright":"1.62.1"}}
