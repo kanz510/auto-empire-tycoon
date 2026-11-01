@@ -56,7 +56,7 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
    for(const x of state.snapshots){
     assert.ok(x.maxX<.96&&x.maxY<.81,'V11.2 camera crops building: '+w+'x'+h+' '+JSON.stringify(x));
     assert.equal(x.wingScale,1,'V11.2 gallery must not scale separately from level-two floor');
-    assert.ok(x.zoom>=.6&&x.zoom<=1.15,'preserve reasonable mobile zoom');
+    assert.ok(x.zoom>=.43&&x.zoom<=1.15,'preserve reasonable mobile zoom for enlarged V14 facade');
    }
    assert.ok(state.decorCount>=8&&state.tagged===0,'V11.2 wing decor must exist but not create new clickable panels');
    assert.equal(state.planterFallback,false,'V11.2 duplicate v9 planters should hide on successful Kenney load');
