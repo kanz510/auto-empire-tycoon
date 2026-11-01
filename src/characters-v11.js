@@ -16,7 +16,7 @@ function characterSwitch(root,model){
  let hasSkin=false;clone.traverse(o=>{if(o.isSkinnedMesh){hasSkin=true;o.frustumCulled=false}if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
  if(!hasSkin)return false;
  const box=new THREE.Box3().setFromObject(clone),sz=box.getSize(new THREE.Vector3());
- const factor=1.8/Math.max(.5,sz.y);clone.scale.setScalar(factor);
+ const factor=2.0/Math.max(.5,sz.y);clone.scale.setScalar(factor);
  clone.position.y=-box.min.y*factor;
  u.fallbackParts.forEach(node=>{if(node!==root.dot)node.visible=false});
  root.add(clone);u.characterImported=true;u.characterVisual=clone;u.characterMixer=new THREE.AnimationMixer(clone);

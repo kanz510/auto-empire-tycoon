@@ -7,7 +7,7 @@ function v11CurvedFrame(points,hex,r=.08){
  m.castShadow=true;showroomV11.add(m);return m;
 }
 // The long raised edge forms a sculpted canopy, not another rectangular roof slab.
-v11CurvedFrame([[-15.5,4.45,3.2],[-11,4.8,3.6],[0,5.08,3.7],[11,4.8,3.6],[15.5,4.45,3.2]],0xe9c27a,.13);
+v11CurvedFrame([[-15.5,4.45,3.2],[-11,4.8,3.6],[0,5.08,3.7],[11,4.8,3.6],[15.5,4.45,3.2]],0xe9c27a,.08);
 v11CurvedFrame([[-15.5,4.45,3.2],[-15.3,4.8,-.8],[-15.3,4.7,-6.4],[-15,4.45,-11.2]],0xc7a774,.095);
 v11CurvedFrame([[15.5,4.45,3.2],[15.3,4.8,-.8],[15.3,4.7,-6.4],[15,4.45,-11.2]],0xc7a774,.095);
 // Slim sunshade fins signal a glass-fronted building without obscuring the playing area.

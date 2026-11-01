@@ -6,7 +6,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fd4f0);scene.f
 scene.add(new THREE.HemisphereLight(0xdff1ff,0x6a8f5a,.7));
 const sun=new THREE.DirectionalLight(0xfff0d0,.85);sun.position.set(25,40,15);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,far:120});scene.add(sun);
 const fill=new THREE.DirectionalLight(0x9ec8ff,.25);fill.position.set(-20,15,-10);scene.add(fill);
-const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.1:1,T=new V(portraitFocus?5.5:0,0,portraitFocus?1:2),TT=T.clone();
+const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.0:1,T=new V(portraitFocus?(S.show>=2?10.5:5.5):0,0,portraitFocus?-1:2),TT=T.clone();
 function fit(){ren.setSize(innerWidth,innerHeight);const a=innerWidth/innerHeight,W=(a<1?36:54)/zoom,H=W/a;cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);
 const BOX_GEOMETRY={};
@@ -33,11 +33,11 @@ const brand=textSign('AUTO EMPIRE',9.7,1.4);brand.position.set(0,5.4,2.22);sh.ad
 const sign=box(10,1.6,.4,0xffffff,0,5.4,2,{emissive:0x666666});sh.add(sign);
 const u2=new THREE.Group();[-13,13].forEach(x=>u2.add(box(1,.8,1,0x6d4c41,x,.7,0),box(1.6,1.6,1.6,0x2e9e4f,x,1.8,0)));u2.add(box(5,.04,3,0x1e3a8a,0,.34,-1));
 const u3=new THREE.Group();[-14,14].forEach(x=>u3.add(box(.8,4,.8,0xffd54f,x,2.2,-10.4,{metalness:.8,roughness:.2})));u3.add(box(3,3,.3,0xffd54f,0,3,-10.6,{metalness:.8,roughness:.2,emissive:0x7a5a00}));sh.add(u2,u3);
-const SP=[[-3,-4],[3,-4],[-9,-4],[9,-4],[-3,-8.5],[3,-8.5]],PD=new THREE.CylinderGeometry(2.7,2.7,.15,24),ped=SP.map(p=>{const m=new THREE.Mesh(PD,M(0x37474f,{roughness:.2,metalness:.5}));m.position.set(p[0],.38,p[1]);m.receiveShadow=true;sh.add(m);return m});
+const SP=[[-3,-4],[3,-4],[-9,-4],[9,-4],[-3,-8.5],[3,-8.5]],PD=new THREE.CylinderGeometry(2.12,2.12,.15,24),ped=SP.map(p=>{const m=new THREE.Mesh(PD,M(0x37474f,{roughness:.2,metalness:.5}));m.position.set(p[0],.38,p[1]);m.receiveShadow=true;sh.add(m);return m});
 [-15,15].forEach(x=>[-10,-4,1].forEach(z=>sh.add(box(.16,3.6,.16,0x27405a,x,1.9,z))));
  const lounge=new THREE.Group();lounge.add(box(3,.55,1.1,0x217d91,-11,.65,-8),box(3,.8,.2,0x217d91,-11,1.15,-8.5),box(1.5,.12,1,0xd9b879,-11,.65,-6.6));sh.add(lounge);
- const wing=new THREE.Group();wing.add(box(12,.3,13,0xdde8ec,21,.15,-4.5),box(12,4.5,.3,0x27405a,21,2.25,-11));[-9,-4,1].forEach(z=>wing.add(box(.22,4,.22,0xe1c499,27,2,z)));const wingSign=textSign('PREMIUM GALLERY',10,1.3);wingSign.position.set(21,4.4,1);wing.add(wingSign);sh.add(wing);
-const oldVis=applyVis;applyVis=function(){oldVis();wing.visible=S.show>=2;wing.scale.x=S.show>=3?1.35:1};
+ const wing=new THREE.Group();wing.add(box(10,.3,12,0xdde8ec,21,.15,-4.5),box(12,4.5,.3,0x27405a,21,2.25,-11));[-9,-4,1].forEach(z=>wing.add(box(.22,4,.22,0xe1c499,26.5,2,z)));const wingSign=textSign('PREMIUM GALLERY',10,1.3);wingSign.position.set(21,4.4,1);wing.add(wingSign);sh.add(wing);
+const oldVis=applyVis;applyVis=function(){oldVis();wing.visible=S.show>=2;wing.scale.x=1};
 key(sh,'show');
 const ctr=new THREE.Group();ctr.add(box(4,1.1,1,0x1565c0,12,.65,-1.6),box(4.2,.12,1.2,0xeeeeee,12,1.25,-1.6),box(.7,.5,.1,0x222222,12.5,1.6,-1.6));key(ctr,'staff');
 const trees=[];[[-20,-14],[20,-12],[-18,17],[22,18],[0,-16],[-8,-16],[9,-16]].forEach(p=>{const g=new THREE.Group();g.add(box(.4,1.4,.4,0x6d4c41,0,.7,0));const c=new THREE.Mesh(new THREE.ConeGeometry(1.5,3.5,7),M(0x2e8b57));c.position.y=3;c.castShadow=true;g.add(c);g.position.set(p[0],0,p[1]);scene.add(g);trees.push(g)});
@@ -49,16 +49,16 @@ function districtInstances(geometry,material,points,shadow){
  mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!!shadow;mesh.receiveShadow=true;livingDistrict.add(mesh);return mesh;
 }
 const outerShrubs=[];
-for(let i=0;i<11;i++)outerShrubs.push([-15.8+i*3.15,.6,-12.65,.55,.8,.55]);
-for(let i=0;i<5;i++){outerShrubs.push([-16.8,.62,-9+i*2.5,.6,.9,.6]);outerShrubs.push([16.8,.62,-9+i*2.5,.6,.9,.6])}
-districtInstances(new THREE.ConeGeometry(.76,1.25,6),M(0x397e52,{roughness:1}),outerShrubs,true);
+for(let i=0;i<11;i++)outerShrubs.push([-15.8+i*3.15,.72,-12.65,.72,1,.72]);
+for(let i=0;i<5;i++){outerShrubs.push([-16.8,.72,-9+i*2.5,.76,1,.76]);outerShrubs.push([16.8,.72,-9+i*2.5,.76,1,.76])}
+districtInstances(new THREE.ConeGeometry(.90,1.6,7),M(0x559b69,{roughness:1}),outerShrubs,true);
 const grassMarks=[];
-for(let i=0;i<72;i++){const x=-47+(i*31%95),z=-28+(i*43%63);
+for(let i=0;i<36;i++){const x=-47+(i*31%95),z=-28+(i*43%63);
  if(Math.abs(x)<31&&z>-16&&z<17)continue;
  if(z>10&&z<17)continue;
- grassMarks.push([x,.025,z,.8+(i%4)*.35,.7,1.2+(i%3)*.3]);
+ grassMarks.push([x,.025,z,.48+(i%4)*.17,.7,.65+(i%3)*.18]);
 }
-districtInstances(new THREE.CylinderGeometry(1,1,.045,6),M(0x81c985,{roughness:1}),grassMarks,false);
+districtInstances(new THREE.CylinderGeometry(1,1,.045,6),M(0x75be69,{roughness:1}),grassMarks,false);
 const zebra=[];for(let i=0;i<8;i++)zebra.push([-31,.135,11.15+i*.45,.7,1,.52]);
 districtInstances(new THREE.BoxGeometry(.36,.025,.32),M(0xf4eee0,{roughness:1}),zebra,false);
 for(const x of [-12.5,12.5]){
@@ -78,6 +78,23 @@ function burst(p){let n=0;PT.forEach(q=>{if(q.l<=0&&n<12){n++;q.l=1;q.m.visible=
 // ---------- camera (đã sửa lệch kéo)
 const cameraOffset=new V(1,1.05,1).multiplyScalar(45);
 function updCam(){T.lerp(TT,.12);cam.position.copy(T).add(cameraOffset);cam.lookAt(T)}
+let framedShowroomLevel=0;
+function frameShowroomForLevel(){
+ if(!portraitFocus||framedShowroomLevel===S.show)return;
+ framedShowroomLevel=S.show;
+ const gallery=S.show>=2;
+ T.set(gallery?10.5:5.4,0,-1);TT.copy(T);
+ zoom=1;fit();
+ cam.position.copy(T).add(cameraOffset);cam.lookAt(T);cam.updateMatrixWorld(true);
+ let maxX=0,maxY=0;
+ const ends=gallery?[-15.8,27.4]:[-15.8,15.8];
+ for(const xx of ends)for(const zz of [-11.7,3.8])for(const yy of [0,6.9]){
+  const p=new V(xx,yy,zz).project(cam);
+  maxX=Math.max(maxX,Math.abs(p.x));maxY=Math.max(maxY,Math.abs(p.y));
+ }
+ zoom=Math.max(.60,Math.min(1.15,Math.min(.90/maxX,.74/maxY)));
+ fit();
+}
 const ptr=new Map(),cvs=ren.domElement,ray=new THREE.Raycaster(),RT=new V(1,0,-1).normalize(),FW=new V(-1,0,-1).normalize();let down=null,pd=0;
 cvs.addEventListener('pointerdown',e=>{cvs.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);down=[e.clientX,e.clientY,0];if(ptr.size==2){const p=[...ptr.values()];pd=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);down[2]=99}audio()});
 cvs.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const o=ptr.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];ptr.set(e.pointerId,[e.clientX,e.clientY]);

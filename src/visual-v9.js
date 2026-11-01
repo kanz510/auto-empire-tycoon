@@ -3,7 +3,7 @@ const showroomPremium=new THREE.Group();showroomPremium.name='showroom-premium-d
 const turntables=new THREE.Group();turntables.name='showroom-turntables';showroomPremium.add(turntables);
 const podiumGlow=[];
 SP.forEach((p,i)=>{
- const ring=new THREE.Mesh(new THREE.TorusGeometry(2.5,.065,3,40),new THREE.MeshBasicMaterial({color:0xffdda0,transparent:true,opacity:.67,depthWrite:false}));
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(2.07,.065,3,40),new THREE.MeshBasicMaterial({color:0xffdda0,transparent:true,opacity:.67,depthWrite:false}));
  ring.rotation.x=-Math.PI/2;ring.position.set(p[0],.49,p[1]);turntables.add(ring);podiumGlow.push(ring);
 });
 showroomPremium.add(
@@ -18,11 +18,12 @@ for(const x of [-12.6,-6.5,0,6.5,12.6]){
  showroomPremium.add(box(.095,2.6,.095,0xd0ae78,x,2.55,1.95,{metalness:.7,roughness:.25}));
  showroomPremium.add(box(2.6,.06,.12,0xf8e5b9,x,3.83,-10.55,{emissive:0x6c552c}));
 }
+const v9Planters=new THREE.Group();v9Planters.name='v9-fallback-planters';showroomPremium.add(v9Planters);
 for(const x of [-13.4,13.4]){
- showroomPremium.add(box(1.4,.6,1.25,0x233e4a,x,.43,-9.2,{metalness:.35,roughness:.5}));
- showroomPremium.add(box(1.23,.055,1.1,0xc79c5c,x,.76,-9.2));
+ v9Planters.add(box(1.4,.6,1.25,0x233e4a,x,.43,-9.2,{metalness:.35,roughness:.5}));
+ v9Planters.add(box(1.23,.055,1.1,0xc79c5c,x,.76,-9.2));
  const leaves=new THREE.Mesh(new THREE.ConeGeometry(.66,1.7,7),M(0x267956,{roughness:1}));
- leaves.position.set(x,1.63,-9.2);leaves.castShadow=true;showroomPremium.add(leaves);
+ leaves.position.set(x,1.63,-9.2);leaves.castShadow=true;v9Planters.add(leaves);
 }
 const showroomLevelTwo=new THREE.Group();showroomLevelTwo.name='showroom-level-2';showroomPremium.add(showroomLevelTwo);
 showroomLevelTwo.add(
@@ -31,6 +32,25 @@ showroomLevelTwo.add(
  box(10,.06,12,0xc7ab76,21,.38,-4.5,{metalness:.25,roughness:.45})
 );
 for(const x of [17.2,24.8])showroomLevelTwo.add(box(.15,3.6,.15,0xc0a56b,x,2.14,1.85,{metalness:.6,roughness:.35}));
+const wingDecor=new THREE.Group();wingDecor.name='premium-gallery-decor';showroomLevelTwo.add(wingDecor);
+for(const x of [18.4,23.5]){
+ const stand=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.25,.24,24),M(0x294250,{metalness:.45,roughness:.32}));
+ stand.position.set(x,.58,-5.15);stand.receiveShadow=true;wingDecor.add(stand);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.04,.035,4,28),M(0xe3c078,{metalness:.65,roughness:.25}));
+ ring.rotation.x=-Math.PI/2;ring.position.set(x,.735,-5.15);wingDecor.add(ring);
+}
+for(const x of [16.9,25.2]){
+ const pot=new THREE.Mesh(new THREE.CylinderGeometry(.49,.36,.56,9),M(0x274a56,{metalness:.25}));
+ pot.position.set(x,.69,-8.8);wingDecor.add(pot);
+ const plant=new THREE.Mesh(new THREE.SphereGeometry(.65,10,7),M(0x4a9360,{roughness:1}));
+ plant.position.set(x,1.45,-8.8);plant.scale.set(1,.95,1);plant.castShadow=true;wingDecor.add(plant);
+}
+for(const x of [16.7,25.3]){
+ const light=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,2.1,8),M(0xc7aa79,{metalness:.6}));
+ light.position.set(x,2.05,-2);wingDecor.add(light);
+ const glow=new THREE.Mesh(new THREE.SphereGeometry(.24,10,8),new THREE.MeshBasicMaterial({color:0xffe9b1}));
+ glow.position.set(x,3.15,-2);wingDecor.add(glow);
+}
 const showroomLevelThree=new THREE.Group();showroomLevelThree.name='showroom-level-3';showroomPremium.add(showroomLevelThree);
 showroomLevelThree.add(
  box(1.1,6,.75,0xb59655,-15.1,3.1,2.15,{metalness:.7,roughness:.3}),
@@ -39,7 +59,7 @@ showroomLevelThree.add(
  box(29.5,.10,.2,0xf4efdd,0,6.4,2.2,{emissive:0x695b3d})
 );
 const showroomVis=applyVis;
-applyVis=function(){showroomVis();showroomLevelTwo.visible=S.show>=2;showroomLevelThree.visible=S.show>=3};
+applyVis=function(){showroomVis();showroomLevelTwo.visible=S.show>=2;showroomLevelThree.visible=S.show>=3;frameShowroomForLevel()};
 
 // Instanced detail parts are cheaper than dozens of extra draw calls per car.
 const baseMakeCar=makeCar;

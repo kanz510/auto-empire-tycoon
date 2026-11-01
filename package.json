@@ -3,7 +3,7 @@
   "private": true,
   "version": "11.0.0",
   "scripts": {
-    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs && node tests/characters-v11.cjs && node tests/fix-v11-1.cjs",
+    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs && node tests/characters-v11.cjs && node tests/fix-v11-1.cjs && node tests/visual-v11-2.cjs",
     "build": "python3 tools/build.py"
   },
   "devDependencies": {

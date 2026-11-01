@@ -31,3 +31,11 @@
 - Đơn đặt xe: chọn ngẫu nhiên từ toàn bộ các loại xe đã mở khóa, gồm sport ở showroom cấp 3.
 - Bổ sung tests/fix-v11-1.cjs kiểm tra reset qua reload, chạm GLB, orderCar. Không thay gameplay khác, UI hay cơ chế offline.
 - Chưa kiểm thử trực tiếp trên Safari iPhone thật.
+
+## V11.2 Visual fixes (2026-11-01)
+- GLB vehicles: paint only the body colormap swatch with cached material/texture per model and requested color; preserve Kenney wheel, window and lamp colors, and retain the original v9 trim/sunroof group. Display cars use CARS[k].col; traffic retains its own colors.
+- Premium Gallery: align level 2/3 wing geometry and wood with pale under-floor, add non-interactive independent décor (pedestals, plants, lamps) without userData.key.
+- Portrait camera reframes entire showroom at 440x956 and 390x844 on initial load and when S.show upgrades. Existing pinch/drag code unchanged.
+- Reduced pedestal/ring radius, grouped v9 fallback planters hidden on successful Kenney load, subtler grass, brighter/shapelier shrubs, 2.0-unit NPCs, thinner curved canopy.
+- Baseline material inventory, before/after screenshots (tiers 1–3 and demo crowd on both viewports), and Playwright regression under docs/screenshots and tests.
+- No changes to SP/slots, economics, gameplay, save key, or other UI. **Safari iPhone real-device testing has not been performed.**
