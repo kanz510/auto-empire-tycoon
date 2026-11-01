@@ -36,7 +36,7 @@ P.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;a
  if(d.a==='policy'){S.policy={balanced:'value',value:'premium',premium:'balanced'}[S.policy];save();refreshP(1)}if(d.a=='close')closeP();if(d.a=='snd'){S.snd^=1;save();refreshP(1)}if(d.a=='auto'){S.auto^=1;save();refreshP(1)}
  if(d.a=='ads'&&S.money>=750&&S.mkt<=480){S.money-=750;recordExpense(750);S.mkt=Math.min(600,S.mkt+120);S.mktN++;beep(700,.15);save();refreshP(1)}
  if(d.a=='gem'&&S.gems>=5){S.gems-=5;S.money+=2500;beep(900,.15);save();refreshP(1)}
- if(d.a=='reset'&&confirm('Xóa toàn bộ tiến trình?')){try{localStorage.removeItem('aet6');localStorage.removeItem('aet6-backup');localStorage.removeItem('aet5');localStorage.removeItem('aet1')}catch(x){}location.reload()}});
+ if(d.a=='reset'&&confirm('Xóa toàn bộ tiến trình?')){resetting=true;try{localStorage.removeItem('aet6');localStorage.removeItem('aet6-backup');localStorage.removeItem('aet5');localStorage.removeItem('aet1')}catch(x){}location.reload()}});
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;audio();const k=b.dataset.o;if(cur==k)closeP();else{focus(k);openP(k)}});
 $('mb').addEventListener('click',()=>openP('mis'));
 function hud(){$('money').textContent=fm(S.money);$('gems').textContent='💎 '+S.gems;$('rep').textContent='★ '+Math.floor(S.rep)+(S.mkt>0?' 📢':'');$('lvt').textContent='Cấp '+S.lvl;$('xpf').style.width=Math.min(100,S.xp/need(S.lvl)*100)+'%';chkMis();

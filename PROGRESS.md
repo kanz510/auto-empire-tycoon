@@ -24,3 +24,10 @@
 - Decorative curved canopy, locally generated premium storefront sign, plus mobile-only visual demo at ?preview=1. Demo changes no S/localStorage/save data and resets visual tiers on exit.
 - New regression: tests/characters-v11.cjs; title test updated. Build now bundles SkeletonUtils r128 and hashes character GLBs.
 - Keep main-only development per owner; still require full GitHub Actions verification and user iPhone Safari check.
+
+## Fix v11.1 (2026-11-01)
+- Reset: chặn save() khi đang reset để pagehide không khôi phục tiến trình đã xóa; giữ nguyên save key aet6, aet6-backup, aet5, aet1.
+- Tương tác: tìm userData.key từ mesh GLB lên các node cha trước khi mở panel, tránh panel trống/cũ khi chạm nhân viên.
+- Đơn đặt xe: chọn ngẫu nhiên từ toàn bộ các loại xe đã mở khóa, gồm sport ở showroom cấp 3.
+- Bổ sung tests/fix-v11-1.cjs kiểm tra reset qua reload, chạm GLB, orderCar. Không thay gameplay khác, UI hay cơ chế offline.
+- Chưa kiểm thử trực tiếp trên Safari iPhone thật.
