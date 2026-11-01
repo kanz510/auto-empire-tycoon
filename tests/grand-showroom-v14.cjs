@@ -18,13 +18,13 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
     const before=JSON.stringify({money:S.money,show:S.show,inv:S.inv,orders:S.orders,staff:S.staff,sold:S.sold});
     const root=scene.getObjectByName('grand-showroom-v14'),out=[];const bounds=grandV14.bounds;
     for(const tier of [1,2,3]){
-     S.show=tier;updateGrandDealershipV14(.05);
+     S.show=tier;updateGrandShowroomV14(.05);
      let keys=0,meshes=0,geom=0;
      root.traverse(o=>{if(o.userData.key)keys++;if(o.isMesh){meshes++;geom++}});
      out.push({tier,active:grandV14.active,visible:[1,2,3].map(i=>grandV14.tiers[i].visible),
       meshes,keys,children:grandV14.tiers[tier].children.length});
     }
-    S.show=1;updateGrandDealershipV14(0);
+    S.show=1;updateGrandShowroomV14(0);
     const after=JSON.stringify({money:S.money,show:S.show,inv:S.inv,orders:S.orders,staff:S.staff,sold:S.sold});
     return {out,same:before===after,inHit:hit.includes(root),bounds,shadowEnabled:ren.shadowMap.enabled};
    });
@@ -41,7 +41,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
    assert.deepEqual(errors,[]);
    const out=path.join(root,'docs/screenshots');fs.mkdirSync(out,{recursive:true});
    for(const tier of [1,2,3]){
-    await page.evaluate(tier=>{S.show=tier;applyVis();updateGrandDealershipV14(0)},tier);
+    await page.evaluate(tier=>{S.show=tier;applyVis();updateGrandShowroomV14(0)},tier);
     await page.waitForTimeout(160);
     await page.screenshot({path:path.join(out,`v14-${width}x${height}-show${tier}.png`),animations:'disabled'});
    }
