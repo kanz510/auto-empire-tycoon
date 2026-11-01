@@ -55,3 +55,12 @@
 - Existing showroom floor is in src/graphics.js rather than showroom-v11.js. Set mapped floor roughness 0.22, metalness 0.12, envMapIntensity 1.0. No environment map provided, so this is a specular floor, not a true mirror/reflection renderer.
 - Added tests/physical-polish-v12.cjs to assert ACES/soft shadows, physical body materials, distinct car paint colors, wheel/map preservation, and save-safe changes in Chromium 440x956 / 390x844.
 - No gameplay, income, customer AI, save key, or player UI changes. Real iPhone Safari remains untested.
+
+## V13 Grand Dealership (2026-11-02)
+- New `src/grand-v13.js` renders an independently grouped, tier-aware flagship showroom architecture.
+- Level 1: entrance forecourt, planters and small illuminated pillars.
+- Level 2: broad canopy, glass front, gold trim, entrance walkway and aligned Premium Gallery extension.
+- Level 3: rooftop crown, signature arch, flagship gallery roof, rooftop gardens and subtly animated emblem.
+- Tier architecture is strictly decorative: no hit keys, changes to customer routes, slot positions, economy, save schema, staff, controls or UI. Existing V12 city remains.
+- `tests/grand-dealership-v13.cjs` checks all three tiers, economic state preservation and 390×844 / 440×956 screenshot capture.
+- Physical Safari iPhone has not been tested.

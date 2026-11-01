@@ -52,3 +52,6 @@ Animated CC0 Mini Characters are loaded on demand from local, content-hashed GLB
 
 ## V12 Living City
 An entirely decorative urban neighborhood now surrounds the dealership: local CC0 Kenney commercial/suburban GLBs, boulevard, sidewalks, garden, street furniture, and two background traffic cars. No gameplay or save migration, and existing management-only controls remain unchanged. City assets are local/offline-cached and shared on model clones. See `docs/ASSET_LICENSES.md` and `docs/screenshots/v12-*.png` for sources and phone viewport screenshots.
+
+## V13 Grand Dealership
+Three visibly distinct showroom architectural tiers (entrance, premium gallery, flagship crown and rooftop garden) are implemented as a noninteractive Three.js group. All original management-only gameplay, saves, car slots and controls are unchanged. Visual regressions and screenshots cover 390×844 and 440×956.
