@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<link rel="icon" href="data:,"><meta name="theme-color" content="#152b45"><meta name="apple-mobile-web-app-capable" content="yes"><title>Auto Empire Tycoon 3D v10</title>
+<link rel="icon" href="data:,"><meta name="theme-color" content="#152b45"><meta name="apple-mobile-web-app-capable" content="yes"><title>Auto Empire Tycoon 3D v11</title>
 </head><body>
 <div id="hud"><div class="pill" id="money">$0</div><div class="pill" id="gems">0</div><div class="pill" id="rep">★ 0</div>
 <div class="pill" id="lvp"><span id="lvt">Cấp 1</span><div id="xpb"><div id="xpf"></div></div></div><div id="mb"></div></div>
@@ -9,12 +9,12 @@
 <div id="modal"><div><h3 id="mt"></h3><p id="mp"></p><button class="btn" onclick="document.getElementById('modal').style.display='none'">Nhận</button></div></div>
 <script>
 (async()=>{
-const current={"build": "d96cb9c605e8b25a", "game": "./dist/game.21aa80f3c1bcd642.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
+const current={"build": "7344e2c0b2eeeae1", "game": "./dist/game.6ebb4803788b669e.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "skeleton": "./vendor/SkeletonUtils-r128.js?v=cc2e2e1a3183ab55", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
 const manifestLink=document.createElement('link');manifestLink.rel='manifest';manifestLink.href=current.manifest;document.head.append(manifestLink);
 let pending=null,requested=false;
 const button=document.createElement('button');button.id='game-update';button.textContent='Cập nhật game';button.style.cssText='position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);z-index:1000;padding:12px;border-radius:12px;border:1px solid #e8c58a;background:#142f46;color:#fff;display:none';document.body.append(button);
 const load=(tag,attrs)=>new Promise((resolve,reject)=>{const e=document.createElement(tag);Object.assign(e,attrs);e.onload=resolve;e.onerror=reject;document.head.append(e)});
-try{await load('link',{rel:'stylesheet',href:current.css});await load('script',{src:current.vendor});await load('script',{src:current.loader});await load('script',{src:current.game})}catch(e){button.textContent='Không tải được game · Tải lại';button.style.display='block';button.onclick=()=>location.reload();return}
+try{await load('link',{rel:'stylesheet',href:current.css});await load('script',{src:current.vendor});await load('script',{src:current.loader});await load('script',{src:current.skeleton});await load('script',{src:current.game})}catch(e){button.textContent='Không tải được game · Tải lại';button.style.display='block';button.onclick=()=>location.reload();return}
 if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
 function ready(reg){if(reg.waiting){pending=reg.waiting;button.style.display='block'}}
 async function check(){try{
