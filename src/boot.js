@@ -5,7 +5,7 @@ const manifestLink=document.createElement('link');manifestLink.rel='manifest';ma
 let pending=null,requested=false;
 const button=document.createElement('button');button.id='game-update';button.textContent='Cập nhật game';button.style.cssText='position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);z-index:1000;padding:12px;border-radius:12px;border:1px solid #e8c58a;background:#142f46;color:#fff;display:none';document.body.append(button);
 const load=(tag,attrs)=>new Promise((resolve,reject)=>{const e=document.createElement(tag);Object.assign(e,attrs);e.onload=resolve;e.onerror=reject;document.head.append(e)});
-try{await load('link',{rel:'stylesheet',href:current.css});await load('script',{src:current.vendor});await load('script',{src:current.loader});await load('script',{src:current.game})}catch(e){button.textContent='Không tải được game · Tải lại';button.style.display='block';button.onclick=()=>location.reload();return}
+try{await load('link',{rel:'stylesheet',href:current.css});await load('script',{src:current.vendor});await load('script',{src:current.loader});await load('script',{src:current.skeleton});await load('script',{src:current.game})}catch(e){button.textContent='Không tải được game · Tải lại';button.style.display='block';button.onclick=()=>location.reload();return}
 if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
 function ready(reg){if(reg.waiting){pending=reg.waiting;button.style.display='block'}}
 async function check(){try{

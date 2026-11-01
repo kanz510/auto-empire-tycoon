@@ -18,3 +18,9 @@
 - Không đổi logic giao dịch, save aet6, AI hay joystick. Chỉ chỉnh quay bánh xe GLB khi di chuyển.
 - Tests: asset-models.cjs, showroom-alive.cjs, smoke/visual-focus/polish; chưa test Safari vật lý.
 - Các asset và GLTF loader phải được phục vụ từ GitHub Pages, không phụ thuộc CDN.
+
+## V11 · Living Dealership (2026-11-01)
+- Replace procedural person visuals with locally bundled Kenney Mini Characters GLBs, including embedded idle/walk/interact-right animations (SkeletonUtils clone, AnimationMixer); procedural fallback retained.
+- Decorative curved canopy, locally generated premium storefront sign, plus mobile-only visual demo at ?preview=1. Demo changes no S/localStorage/save data and resets visual tiers on exit.
+- New regression: tests/characters-v11.cjs; title test updated. Build now bundles SkeletonUtils r128 and hashes character GLBs.
+- Keep main-only development per owner; still require full GitHub Actions verification and user iPhone Safari check.

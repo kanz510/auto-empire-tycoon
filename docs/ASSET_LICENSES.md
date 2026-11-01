@@ -15,3 +15,12 @@ Original publisher: [Kenney Car Kit](https://kenney.nl/assets/car-kit), [Kenney 
 - Three.js MIT License: https://github.com/mrdoob/three.js/blob/r128/LICENSE
 
 If models are replaced, recheck the source license and maintain this inventory. Do not redistribute unverified paid models or scraped copyrighted cars.
+
+## Kenney Mini Characters (CC0 1.0 Universal), V11
+- Original: https://kenney.nl/assets/mini-characters
+- CC0 source mirror: https://github.com/Hidencod/tge-assets (packs/mini-characters/)
+- Locally bundled: character-male-a, character-male-c, character-female-b and character-female-e (kenney-npc-*.glb).
+- The files include their own rigged meshes and animation clips; no external animation service is used.
+
+## Three.js SkeletonUtils r128 (MIT), V11
+- `vendor/SkeletonUtils-r128.js` is copied from https://github.com/mrdoob/three.js/blob/r128/examples/js/utils/SkeletonUtils.js and remains under the Three.js MIT license.

@@ -46,3 +46,6 @@ See PLUGIN-VALIDATION.md for provenance, availability and observed browser check
 
 ## V10 art upgrade
 Five Kenney vehicle GLBs and four prop GLBs ship locally and are cache-versioned in the service worker. The r128 GLTFLoader is vendored alongside Three.js; procedural cars remain the fail-safe if a GLB cannot load. All assets are from Kenney CC0 packs; see [docs/ASSET_LICENSES.md](docs/ASSET_LICENSES.md). No save migration or gameplay input change.
+
+## V11 Living Dealership
+Animated CC0 Mini Characters are loaded on demand from local, content-hashed GLB files and cloned with the vendored Three.js r128 SkeletonUtils. Use `?preview=1` to open the **TEST CẢNH** panel, cycle the three visual showroom tiers and display extra NPCs without modifying saved money, staff, progress or upgrades. `Cảnh thật` clears preview actors and restores the real level. The original procedural people remain as a graceful fallback if optional assets fail.

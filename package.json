@@ -1,7 +1,7 @@
 {
   "name": "auto-empire-tycoon",
   "private": true,
-  "version": "10.0.0",
+  "version": "11.0.0",
   "scripts": {
     "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs && node tests/characters-v11.cjs",
     "build": "python3 tools/build.py"
