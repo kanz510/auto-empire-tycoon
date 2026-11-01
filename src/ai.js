@@ -2,7 +2,7 @@
 const ang=(a,b,t)=>{let d=b-a;d=Math.atan2(Math.sin(d),Math.cos(d));return a+d*Math.min(1,t)};
 function follow(o,sp,dt,car){if(!o.path.length){o.mv=false;return true}const m=o.m,p=o.path[0],dx=p[0]-m.position.x,dz=p[1]-m.position.z,d=Math.hypot(dx,dz),st=sp*dt;
  if(d<=st){m.position.x=p[0];m.position.z=p[1];o.path.shift();o.mv=o.path.length>0;return !o.path.length}
- m.position.x+=dx/d*st;m.position.z+=dz/d*st;m.rotation.y=ang(m.rotation.y,car?Math.atan2(-dz,dx):Math.atan2(dx,dz),dt*8);if(car&&m.wheels)m.wheels.forEach(w=>w.rotation.z-=st/.38);o.mv=true;return false}
+ m.position.x+=dx/d*st;m.position.z+=dz/d*st;m.rotation.y=ang(m.rotation.y,car?Math.atan2(-dz,dx):Math.atan2(dx,dz),dt*8);if(car&&m.wheels)m.wheels.forEach(w=>w.userData.kenneyWheel?(w.rotation.x+=st/.38):(w.rotation.z-=st/.38));o.mv=true;return false}
 const face=(m,x,z)=>{m.rotation.y=Math.atan2(x-m.position.x,z-m.position.z)};
 const custs=[],pk=[0,0,0,0,0,0],staff=[];let ctrC=null,spawnT=1.5,warnT=0;
 function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]);if(!free.length)return;const pi=free[R()*free.length|0];pk[pi]=1;

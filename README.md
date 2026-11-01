@@ -43,3 +43,6 @@ This small follow-up uses an editable Figma management reference and a 200×200 
 Ready orders now consume newly imported warehouse stock before empty display slots. Price formulas, timers, save names, offline calculations and automatic management remain unchanged. Same-size static box meshes share geometry; the camera offset is reused rather than allocated each frame.
 
 See PLUGIN-VALIDATION.md for provenance, availability and observed browser checks. The canceled cache/session rewrite is not included in this release.
+
+## V10 art upgrade
+Five Kenney vehicle GLBs and four prop GLBs ship locally and are cache-versioned in the service worker. The r128 GLTFLoader is vendored alongside Three.js; procedural cars remain the fail-safe if a GLB cannot load. All assets are from Kenney CC0 packs; see [docs/ASSET_LICENSES.md](docs/ASSET_LICENSES.md). No save migration or gameplay input change.

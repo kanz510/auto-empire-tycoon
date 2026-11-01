@@ -11,3 +11,10 @@
 - Không thay logic mua/bán, không sửa save key, không thêm API hay phụ thuộc mạng. UI vẫn quản lý tự động, không joystick.
 - tests/showroom-alive.cjs kiểm tra hiệu ứng 3D, kích hoạt xe giao hàng, kinh tế giữ nguyên, các cấp nâng cấp và UI mobile.
 - Tên hiển thị v9, mã nguồn nhiều file được giữ nguyên. Chưa test iPhone Safari thật.
+
+## V10 · Kenney GLB Asset Remaster (2026-11-01)
+- Tích hợp CC0 Kenney Cars (hatch/sedan/SUV/sport), xe giao hàng, sofa, bàn kính, chậu cây và bụi cây; thay mô hình hộp bằng GLB khi tải xong, có procedural fallback.
+- GLTFLoader r128 lưu nội bộ, build tự hash .glb và precache cùng bundle khi offline; xem docs/ASSET_LICENSES.md.
+- Không đổi logic giao dịch, save aet6, AI hay joystick. Chỉ chỉnh quay bánh xe GLB khi di chuyển.
+- Tests: asset-models.cjs, showroom-alive.cjs, smoke/visual-focus/polish; chưa test Safari vật lý.
+- Các asset và GLTF loader phải được phục vụ từ GitHub Pages, không phụ thuộc CDN.

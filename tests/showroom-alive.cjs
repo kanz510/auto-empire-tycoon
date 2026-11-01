@@ -16,7 +16,7 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
   await page.goto('http://127.0.0.1:'+server.address().port+'/');
   await page.waitForFunction(()=>typeof S!=='undefined'&&typeof makeCar==='function');
   const a=await page.evaluate(()=>{
-   const details=KS.map(k=>{const car=makeCar(k),group=car.getObjectByName('vehicle-detail-package');return {key:k,instanced:group?group.children.filter(m=>m.isInstancedMesh).length:0,wheels:car.wheels.length}});
+   const details=KS.map(k=>{const car=makeCar(k),group=car.getObjectByName('vehicle-detail-package');return {key:k,instanced:group?group.children.filter(m=>m.isInstancedMesh).length:0,wheels:car.wheels.length,glb:!!car.userData.assetModel}});
    const visual=scene.getObjectByName('showroom-premium-details');
    const rings=visual?.getObjectByName('showroom-turntables');
    const stageCount=rings?.children.length||0;
@@ -29,7 +29,7 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
    const motion=d?Math.abs(d.mesh.rotation.y-prev):0;
    return {details,stageCount,hidden,revealed,motion,moneyStable:S.money===cash,soldStable:S.sold===sold};
   });
-  assert.ok(a.details.every(d=>d.instanced>=2&&d.wheels>=4),'model accents should use instancing: '+JSON.stringify(a.details));
+  assert.ok(a.details.every(d=>(d.instanced>=2||d.glb)&&d.wheels>=4),'model accents should use instancing: '+JSON.stringify(a.details));
   assert.ok(a.stageCount>=4,'showroom needs lighted turntable accents');
   assert.equal(a.hidden,true);assert.equal(a.revealed,true);
   assert.ok(a.motion>.005,'display vehicle must animate slowly');
