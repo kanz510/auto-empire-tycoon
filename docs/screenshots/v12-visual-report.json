@@ -1,0 +1,326 @@
+[
+  {
+    "viewport": [
+      440,
+      956
+    ],
+    "level": 1,
+    "zoom": 0.8811638350170824,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.22,
+        "ndcY": 0.71
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.35,
+        "ndcY": 0.57
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.96,
+        "ndcY": 0.42
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.53,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 2.13,
+        "ndcY": 0.06
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.96,
+        "ndcY": -0.17
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  },
+  {
+    "viewport": [
+      440,
+      956
+    ],
+    "level": 2,
+    "zoom": 0.7366642993711943,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.33,
+        "ndcY": 0.63
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.14,
+        "ndcY": 0.52
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.65,
+        "ndcY": 0.39
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.13,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 1.64,
+        "ndcY": 0.09
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.33,
+        "ndcY": -0.1
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  },
+  {
+    "viewport": [
+      440,
+      956
+    ],
+    "level": 3,
+    "zoom": 0.7366642993711943,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.33,
+        "ndcY": 0.63
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.14,
+        "ndcY": 0.52
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.65,
+        "ndcY": 0.39
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.13,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 1.64,
+        "ndcY": 0.09
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.33,
+        "ndcY": -0.1
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "level": 1,
+    "zoom": 0.8811638350170824,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.22,
+        "ndcY": 0.71
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.35,
+        "ndcY": 0.57
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.96,
+        "ndcY": 0.42
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.53,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 2.13,
+        "ndcY": 0.06
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.96,
+        "ndcY": -0.17
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "level": 2,
+    "zoom": 0.7366642993711943,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.33,
+        "ndcY": 0.63
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.14,
+        "ndcY": 0.52
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.65,
+        "ndcY": 0.39
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.13,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 1.64,
+        "ndcY": 0.09
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.33,
+        "ndcY": -0.1
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "level": 3,
+    "zoom": 0.7366642993711943,
+    "buildings": [
+      {
+        "key": "city-commercial-a",
+        "x": -35,
+        "z": -35,
+        "ndcX": -0.33,
+        "ndcY": 0.63
+      },
+      {
+        "key": "city-commercial-c",
+        "x": -19.5,
+        "z": -36,
+        "ndcX": 0.14,
+        "ndcY": 0.52
+      },
+      {
+        "key": "city-commercial-g",
+        "x": -3,
+        "z": -37,
+        "ndcX": 0.65,
+        "ndcY": 0.39
+      },
+      {
+        "key": "city-commercial-h",
+        "x": 14.5,
+        "z": -36,
+        "ndcX": 1.13,
+        "ndcY": 0.25
+      },
+      {
+        "key": "city-suburban-h",
+        "x": 33,
+        "z": -35,
+        "ndcX": 1.64,
+        "ndcY": 0.09
+      },
+      {
+        "key": "city-commercial-c",
+        "x": 57,
+        "z": -35,
+        "ndcX": 2.33,
+        "ndcY": -0.1
+      }
+    ],
+    "loaded": 9,
+    "failed": []
+  }
+]
