@@ -1,0 +1,31 @@
+name: V12 missing city regression (one-time RED)
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Confirm V12 test fails on missing city layer
+        run: |
+          set +e
+          node tests/living-city-v12.cjs > /tmp/city-red.log 2>&1
+          result=$?
+          set -e
+          cat /tmp/city-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "Expected a missing-city failure before implementation"
+            exit 1
+          fi
+          grep -q "waitForFunction" /tmp/city-red.log
+          echo "RED confirmed: city scene does not exist yet"
