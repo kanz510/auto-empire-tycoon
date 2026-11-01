@@ -16,14 +16,19 @@ scene.add(cityV12.root);
 // showroom floor, parking positions and customer walking paths remain untouched.
 cityV12.roads.add(
  box(142,.075,7.4,0x46525c,0,.035,-22.5),
- box(8.2,.075,80,0x46525c,47,.04,-1),
+ box(8.2,.075,42,0x46525c,47,.04,-40),
  box(142,.24,1.22,0xc1c1b5,0,.13,-27.1),
  box(142,.24,1.24,0xc1c1b5,0,.13,-17.88),
- box(1.23,.24,80,0xc1c1b5,42.4,.13,-1),
- box(1.23,.24,80,0xc1c1b5,51.6,.13,-1),
+ box(1.23,.24,42,0xc1c1b5,42.4,.13,-40),
+ box(1.23,.24,42,0xc1c1b5,51.6,.13,-40),
  box(18,.10,15,0x668d70,-43,.055,-3.2),
  box(15.7,.065,2.1,0xd4ccad,-43,.09,-3.3),
- box(2.15,.065,13.8,0xd4ccad,-43,.1,-3.3)
+ box(2.15,.065,13.8,0xd4ccad,-43,.1,-3.3),
+ // Across from the original traffic street, a landscaped forecourt fills
+ // the empty foreground without touching parking or customer routes.
+ box(35,.10,14.5,0x779f7d,0,.06,27),
+ box(36,.07,2.4,0xd7cdb7,0,.11,18.9),
+ box(2.4,.07,14,0xd7cdb7,-1,.115,27)
 );
 const avenueStripe=new THREE.InstancedMesh(
  new THREE.BoxGeometry(1.6,.025,.09),M(0xf5d68a,{roughness:.88}),40
@@ -51,6 +56,17 @@ for(const x of [-48,-38]){
 const sculpture=new THREE.Mesh(new THREE.TorusGeometry(1.18,.18,7,20),M(0xcda96d,{metalness:.55,roughness:.3}));
 sculpture.position.set(-43,1.75,-3.2);sculpture.rotation.y=.35;v12Park.add(sculpture);
 v12Park.add(box(1.8,.45,1.8,0x354953,-43,.28,-3.2));
+// Circular public fountain across the road. Reused standard materials and no lights.
+const fountainBasin=new THREE.Mesh(new THREE.CylinderGeometry(2.15,2.35,.31,24),M(0xc7c6bd,{roughness:.8}));
+fountainBasin.position.set(7,.24,28.5);fountainBasin.receiveShadow=true;v12Park.add(fountainBasin);
+const fountainPool=new THREE.Mesh(new THREE.CylinderGeometry(1.82,1.82,.035,24),M(0x5aabb8,{metalness:.18,roughness:.28}));
+fountainPool.position.set(7,.425,28.5);v12Park.add(fountainPool);
+const fountainCenter=new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1),M(0xe7c889,{metalness:.52,roughness:.34}));
+fountainCenter.position.set(7,.98,28.5);v12Park.add(fountainCenter);
+for(const z of [23.5,30.5]){
+ v12Park.add(box(2.3,.18,.68,0x947454,-10,.65,z));
+ v12Park.add(box(.16,.55,.16,0x364c50,-10.8,.34,z),box(.16,.55,.16,0x364c50,-9.2,.34,z));
+}
 
 // Each building is rendered from a Kenney GLB, not a box. Metadata stays separate
 // from the actual scene node for simple visual verification and a reliable fallback.
@@ -74,7 +90,8 @@ cityPlots.forEach(o=>cityPlot(...o));
 const cityTreeData=[
  [-49,-13,3.7],[-39,-13,4.2],[-46,5,4.5],[-39,5.8,3.9],
  [-26,-28,3.7],[-11,-28.5,3.2],[5,-29,4],[26,-29,3.6],[43,-29.4,4.7],
- [36,4.4,3.3],[54,6,3.8],[-55,-28,4.5]
+ [36,4.4,3.3],[54,6,3.8],[-55,-28,4.5],
+ [-15,26,3.8],[-5,31.5,3.5],[17,27,4.1],[19,32,3.6]
 ];
 const cityTreeSpecs={
  'city-tree-oak':cityTreeData.filter((_,i)=>i%2===0),
