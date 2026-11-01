@@ -27,6 +27,7 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
   });
   assert.ok(state.imported&&state.skinCount>0&&state.actions&&state.moving&&state.interacting,JSON.stringify(state));
   const initial=await page.evaluate(()=>({show:S.show,money:S.money,staff:S.staff}));
+  await page.locator('#preview-toggle').click();
   await page.locator('#preview-tier-3').click();
   await page.locator('#preview-crowd').click();
   const preview=await page.evaluate(()=>({
@@ -36,7 +37,9 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
   }));
   assert.deepEqual(preview.state,initial,'demo must not change game progression');
   assert.ok(preview.level3&&preview.extra>=3&&preview.people,'visual preview should create characters and tier 3');
+  await page.screenshot({path:path.join(root,'test-results/v11-crowd-preview.png')});
   await page.locator('#preview-clear').click();
+  assert.equal(await page.locator('#preview-controls').isVisible(),false,'panel should collapse to reveal the showroom');
   assert.equal(await page.evaluate(()=>showroomLevelThree.visible),initial.show>=3,'closing demo must restore actual showroom');
   await page.screenshot({path:path.join(root,'test-results/v11-characters.png')});
   assert.deepEqual(errors,[]);console.log('PASS v11: skinned character assets, locomotion/interaction animations, isolated visual preview, no save mutation');
