@@ -1,0 +1,662 @@
+{
+  "version": "v11.1 before visual fixes",
+  "date": "2026-11-01",
+  "vehicles": {
+    "hatch": [
+      {
+        "mesh": "wheel-front-right",
+        "parent": "hatchback-sports",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-left",
+        "parent": "hatchback-sports",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-right",
+        "parent": "hatchback-sports",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-left",
+        "parent": "hatchback-sports",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "body",
+        "parent": "hatchback-sports",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      }
+    ],
+    "sedan": [
+      {
+        "mesh": "wheel-front-right",
+        "parent": "sedan",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "body",
+        "parent": "sedan",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-left",
+        "parent": "sedan",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-right",
+        "parent": "sedan",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-left",
+        "parent": "sedan",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      }
+    ],
+    "suv": [
+      {
+        "mesh": "wheel-back-right",
+        "parent": "suv-luxury",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-right",
+        "parent": "suv-luxury",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-left",
+        "parent": "suv-luxury",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "body",
+        "parent": "suv-luxury",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-left",
+        "parent": "suv-luxury",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      }
+    ],
+    "sport": [
+      {
+        "mesh": "body",
+        "parent": "race",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-left",
+        "parent": "race",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-front-right",
+        "parent": "race",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-left",
+        "parent": "race",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      },
+      {
+        "mesh": "wheel-back-right",
+        "parent": "race",
+        "geometry": "BufferGeometry",
+        "materials": [
+          {
+            "name": "colormap",
+            "color": "ffffff",
+            "hasMap": true,
+            "vertexColors": false,
+            "metalness": 0,
+            "roughness": 1,
+            "transparent": false
+          }
+        ]
+      }
+    ]
+  },
+  "camera": [
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "tier": 1,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1,
+      "wingVisible": false,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.256
+        ],
+        [
+          1.707,
+          -0.161
+        ],
+        [
+          1.102,
+          -0.327
+        ]
+      ]
+    },
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "tier": 2,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1,
+      "wingVisible": true,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.256
+        ],
+        [
+          1.707,
+          -0.161
+        ],
+        [
+          1.102,
+          -0.327
+        ]
+      ]
+    },
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "tier": 3,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1.35,
+      "wingVisible": true,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.256
+        ],
+        [
+          1.707,
+          -0.161
+        ],
+        [
+          1.102,
+          -0.327
+        ]
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "tier": 1,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1,
+      "wingVisible": false,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.257
+        ],
+        [
+          1.707,
+          -0.162
+        ],
+        [
+          1.102,
+          -0.328
+        ]
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "tier": 2,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1,
+      "wingVisible": true,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.257
+        ],
+        [
+          1.707,
+          -0.162
+        ],
+        [
+          1.102,
+          -0.328
+        ]
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "tier": 3,
+      "zoom": 1.1,
+      "target": [
+        5.5,
+        0,
+        1
+      ],
+      "wingScale": 1.35,
+      "wingVisible": true,
+      "visibleAtX": [
+        [
+          0.929,
+          0.052
+        ],
+        [
+          0.324,
+          -0.114
+        ],
+        [
+          1.448,
+          -0.09
+        ],
+        [
+          0.843,
+          -0.257
+        ],
+        [
+          1.707,
+          -0.162
+        ],
+        [
+          1.102,
+          -0.328
+        ]
+      ]
+    }
+  ],
+  "characters": [
+    {
+      "size": [
+        440,
+        956
+      ],
+      "models": [
+        {
+          "role": "sales",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "vip",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "customer",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "sales",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "vip",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "female",
+          "imported": true,
+          "height": 1.8
+        }
+      ],
+      "loaded": 4
+    },
+    {
+      "size": [
+        390,
+        844
+      ],
+      "models": [
+        {
+          "role": "sales",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "vip",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "customer",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "sales",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "vip",
+          "imported": true,
+          "height": 1.8
+        },
+        {
+          "role": "female",
+          "imported": true,
+          "height": 1.8
+        }
+      ],
+      "loaded": 4
+    }
+  ]
+}
