@@ -1,0 +1,66 @@
+name: V11.2 visual-only regression and release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install local browser dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: RED: new visual regression must catch current bug
+        run: |
+          set +e
+          node tests/visual-v11-2.cjs > /tmp/v11-2-red.log 2>&1
+          code=$?
+          set -e
+          cat /tmp/v11-2-red.log
+          if [ "$code" -eq 0 ] || ! grep -q "V11.2 car body must retain requested showroom color" /tmp/v11-2-red.log; then
+            echo "Expected V11.2 car color regression was not reproduced"
+            exit 1
+          fi
+      - name: Apply targeted visual-only fixes
+        run: |
+          python tools/patch-visual-geometry-v11-2.py
+          python tools/patch-visual-paint-v11-2.py
+          python tools/patch-visual-tests-v11-2.py
+      - name: Build
+        run: npm run build
+      - name: Full browser regression
+        run: |
+          npm install
+          npx playwright install chromium
+          npm test
+      - name: Take after screenshots for both phone viewports and all showroom tiers
+        run: node tools/visual-after-v11-2.cjs
+      - name: Commit source, release and comparison screenshots
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/ tests/visual-focus.cjs package.json PROGRESS.md index.html release.json sw.js dist/ docs/screenshots/after-*.png docs/screenshots/after-materials-and-bounds.json
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "fix(visual v11.2): car colors, gallery alignment, portrait framing and environment"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v11-2-after-screenshots
+          path: docs/screenshots/after-*.png
+          if-no-files-found: ignore
