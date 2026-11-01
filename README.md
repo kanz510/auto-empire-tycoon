@@ -28,3 +28,8 @@ npm test
 SOAK_SECONDS=600 npm test
 ```
 For a system browser set BROWSER_BIN. Tests serve only the game assets on loopback and verify money, training, persistence, offline recovery, touch menus and two-tab protection. See VALIDATION.md for observed results and limits.
+
+## v7
+Adds an automatic used-car desk ($1800 purchase, $2600 resale after 40 seconds), up to three customer orders (45 seconds then warehouse fulfillment), near-budget negotiation and a visible premium showroom wing. Redesigned management panels and additional car/body/character details. Existing v6 save keys and all v6 management systems retained.
+
+Limits: used-car inspection is a simplified fixed-margin workflow; orders are requested through the inventory panel; the premium wing is visual and existing display capacity remains governed by showroom level. Physical iPhone/Safari performance has not been verified.
