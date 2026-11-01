@@ -1,0 +1,60 @@
+name: Premium Materials V12.1 Verified Release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  verify-and-release:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies and browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Verify RED on old renderer and material
+        run: |
+          set +e
+          node tests/physical-polish-v12.cjs > /tmp/physical-red.log 2>&1
+          code=$?
+          set -e
+          cat /tmp/physical-red.log
+          if [ "$code" -eq 0 ] || ! grep -q "ACES Filmic renderer tone mapping must be active" /tmp/physical-red.log; then
+            echo "Expected ACES regression was not reproduced"
+            exit 1
+          fi
+          echo "RED confirmed for missing ACES"
+      - name: Apply guarded source changes
+        run: python .github/scripts/physical-v12-1.py
+      - name: Generate release with new source
+        run: npm run build
+      - name: Full Chromium regression including premium materials
+        run: npm test
+      - name: Commit source, generated release and progress
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/graphics.js src/assets-3d.js package.json PROGRESS.md index.html release.json sw.js manifest.webmanifest dist/
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "feat(visual): ACES Filmic, cached physical clearcoat car paint and premium floor"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-premium-materials-iphone-screens
+          path: |
+            test-results/physical-polish-*.png
+          if-no-files-found: ignore
