@@ -9,7 +9,7 @@
 <div id="modal"><div><h3 id="mt"></h3><p id="mp"></p><button class="btn" onclick="document.getElementById('modal').style.display='none'">Nhận</button></div></div>
 <script>
 (async()=>{
-const current={"build": "7344e2c0b2eeeae1", "game": "./dist/game.6ebb4803788b669e.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "skeleton": "./vendor/SkeletonUtils-r128.js?v=cc2e2e1a3183ab55", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
+const current={"build": "7e3c622958b91691", "game": "./dist/game.aa6c3b23695d2a24.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "skeleton": "./vendor/SkeletonUtils-r128.js?v=cc2e2e1a3183ab55", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
 const manifestLink=document.createElement('link');manifestLink.rel='manifest';manifestLink.href=current.manifest;document.head.append(manifestLink);
 let pending=null,requested=false;
 const button=document.createElement('button');button.id='game-update';button.textContent='Cập nhật game';button.style.cssText='position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);z-index:1000;padding:12px;border-radius:12px;border:1px solid #e8c58a;background:#142f46;color:#fff;display:none';document.body.append(button);
