@@ -1,35 +1,38 @@
-# Auto Empire Tycoon 3D v6
+# Auto Empire Tycoon — v8 delivery architecture
 
 Play: https://kanz510.github.io/auto-empire-tycoon/
 
-Idle dealership management. No character controls, paid APIs, or runtime CDN dependencies. Three.js r128 and its MIT license remain embedded in index.html.
+V8 changes packaging and updates only. The v7 CSS, UI, 3D renderer and game rules remain intact. The one new UI element is a waiting-release “Cập nhật game” button.
 
-## v6
-- Per-model price controls (85–120%), 10-minute market cycles with price/cost/demand changes, preference-weighted customers and locked quotes.
-- Weighted inventory cost basis persisted on display vehicles; consignment pays only the margin.
-- Twelve training levels, 30 seconds each, with growing costs and persistent progress.
-- Profit by sales, garage, test drives and offline earnings; operating expenses and rolling 24-hour net profit.
-- Recoverable v6 save snapshots, legacy v5/v1 migration without deleting their keys; ownership guard prevents another v6 tab from overwriting a live save.
-- Chrome trim and rotating wheels, character eyes, showroom framing/lounge/brand signage, corrected material color space; geometry instancing and shared caches.
-- Adaptive resolution plus Eco/High modes, 44px touch targets and stable live panel controls.
-- Service worker caches the game for offline reopening after the first successful online visit. The HTML also contains the complete game for direct file use; service workers require HTTPS/localhost.
+## Source layout
+- src/models.js and graphics.js: original geometry, materials, scene and camera
+- src/ai.js: original customers, staff and garage behavior
+- src/gameplay.js and main.js: original inventory, missions, simulation and lifecycle
+- src/economy.js: original transactions and income
+- src/save-state.js: original state/compatibility and persistence
+- src/ui.js: original management panels
+- src/lifecycle.js: save-before-update bridge
+- src/boot.js: delivery, release discovery and update button
+- styles/game.css: byte-for-byte v7 stylesheet
+- assets/: app metadata/icon; vendor/: embedded Three.js r128 extracted with its license
 
-## Save compatibility
-Use the same browser and site origin to retain localStorage. Renaming files on the same GitHub Pages origin does not change the save namespace. Changing domains/devices does not transfer saves automatically. Keep the original browser data. If storage is denied or full the game reports failure; do not assume the session is saved.
+These are ordered source modules, compiled into a shared-scope classic bundle. This deliberately preserves v7 lexical scope, function hoisting and behavior; they are not independently imported ES modules. Runtime loads vendor once, CSS once and one game bundle, avoiding eight module network round trips.
 
-Income uses the saved rolling profit rate, 50% efficiency and a two-hour cap. A garage job interrupted by reload refunds its escrow. Active customer routes restart after reload, while cars, cost basis and money persist. Old v5 totals are retained; detailed category/history metrics begin in v6.
+## Build/version
+Run `npm run build` (Python 3, no package install needed for building). The build ID hashes source, styles, vendor, assets and build tooling. It is automatically derived, not a manually edited v8 number. CSS/game/icon/manifest filenames are content addressed; the vendor URL includes its content hash. The generated index embeds the exact release mapping.
+
+Commit source **and generated** index.html, release.json, sw.js and dist/. The workflow checks these are reproducible. Old immutable dist files are retained intentionally: stale CDN HTML must still be able to request its original bundle. They can be archived only after the supported stale-client period. Build identity does not use the resulting commit SHA, avoiding a self-referential commit hash.
+
+## Updates, GitHub Pages and offline
+The shell embeds its bundle URLs so it can boot even when release discovery is offline. It requests release.json with a unique URL/no-store; the SW never serves a stale online release response. SW URLs contain the build ID, bypassing the GitHub Pages CDN's stable-URL TTL. Registration uses updateViaCache:none and checks again each minute and on visibility return.
+
+Installation precaches the complete release and fails without replacing the active worker if any asset fails. New workers wait for approval; the button first calls the existing save function. A failed save cancels the reload. Activation happens only after approval, and only the requesting tab reloads. Other tabs retain the existing owner protection.
+
+The active SW serves assets from its own cache, and navigation uses the shell belonging to its active release; a new shell is adopted only after approved activation. Activation keeps the current cache and one previous application cache, removing older application caches only. It never deletes localStorage, unrelated caches or player saves. Existing aet6/aet6-backup/aet5/aet1 names and migration logic are unchanged.
+
+First successful online installation is required for offline reopening. Storage eviction by iOS or private-browsing restrictions cannot be prevented. HTTPS/localhost is required; modular v8 is no longer a directly opened single-file HTML.
 
 ## Tests
-Node.js 20+:
-```sh
-npm install
-npx playwright install chromium
-npm test
-SOAK_SECONDS=600 npm test
-```
-For a system browser set BROWSER_BIN. Tests serve only the game assets on loopback and verify money, training, persistence, offline recovery, touch menus and two-tab protection. See VALIDATION.md for observed results and limits.
-
-## v7
-Adds an automatic used-car desk ($1800 purchase, $2600 resale after 40 seconds), up to three customer orders (45 seconds then warehouse fulfillment), near-budget negotiation and a visible premium showroom wing. Redesigned management panels and additional car/body/character details. Existing v6 save keys and all v6 management systems retained.
-
-Limits: used-car inspection is a simplified fixed-margin workflow; orders are requested through the inventory panel; the premium wing is visual and existing display capacity remains governed by showroom level. Physical iPhone/Safari performance has not been verified.
+`npm install && npx playwright install chromium && npm test`.
+Optional `BROWSER_BIN=/usr/bin/chromium`, `SOAK_SECONDS=600`.
+See VALIDATION-v8.md. Physical Safari/iPhone testing remains necessary for platform-specific storage/termination behavior.

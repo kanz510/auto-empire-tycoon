@@ -1,0 +1,43 @@
+// ---------- giao diện
+let cur=null;const P=$('P');
+const rw=(t,l,mx,ben,k)=>{const c=l>=mx?null:COST[k]();return`<div class="r"><div><b>${t}</b> · Cấp ${l}/${mx}<br>${ben}</div>${c==null?'<b>TỐI ĐA</b>':`<button data-u="${k}" ${S.money<c?'disabled':''}>${fm(c)}</button>`}</div>`};
+const hd=t=>`<div class="r"><div><b style="font-size:16px">${t}</b></div><button data-a="close">✕</button></div>`,STN={IDLE:'Rảnh',MOVING:'Di chuyển',SERVING:'Phục vụ',FINISHING:'Hoàn tất'};
+function ph(k){let h='';
+ if(k=='show')h=hd('Showroom & Dịch vụ')+rw('Showroom',S.show,3,S.show<3?`+${[2,4,6][S.show]-NSL()} chỗ trưng bày${S.show==1?', mở SUV':', mở xe thể thao, cổng vàng'}`:'Cấp cao nhất','show')+rw('Bãi đỗ xe',S.park,3,S.park<3?`${NPK()} → ${[2,4,6][S.park]} ô, khách đến nhanh hơn`:'Tối đa','park')+rw('Khu lái thử',S.td,3,S.td<3?`Cho ${S.td+1} xe lái thử cùng lúc: thu phí và khách trả thêm 3%`:'Tối đa','td')+rw('Khu sửa chữa',S.gar,3,S.gar<3?(S.gar?'Sửa nhanh hơn, lãi cao hơn':'Nhập xe cũ, sửa và bán lại'):'Tối đa','gar')+`<div class="r"><div>Chỗ trưng bày <b>${NSL()}</b> · Ô đỗ <b>${NPK()}</b> · Sức chứa kho <b>${CAP()}</b></div></div>`;
+ if(k=='inv')h=hd('Kho xe ('+STK()+'/'+CAP()+')')+KS.map(x=>{const c=CARS[x];return c.lv>S.show?`<div class="r"><div><b>${c.n}</b><br>Mở khóa ở Showroom cấp ${c.lv}</div></div>`:`<div class="r"><div><b>${c.n}</b> · tồn <b>${S.inv[x]}</b><br>Nhập ${fm(stockCost(x))} · Giá cơ sở ${fm(quote(x,{pref:'',vip:false}))}<br>Thị trường ${market(x).demand>1?'↗ Nhu cầu cao':'↘ Nhu cầu thấp'} · Giá đặt ${Math.round(S.pricing[x]*100)}%</div><button data-b="${x}:1" ${S.money<stockCost(x)?'disabled':''}>+1</button><button data-b="${x}:5" ${S.money<stockCost(x)*5?'disabled':''}>+5</button><button aria-label="Giảm giá" data-p="${x}:-0.05">−</button><button aria-label="Tăng giá" data-p="${x}:0.05">+</button></div>`}).join('')+`<div class="r"><div>Tự động nhập khi hết xe: <b>${S.auto?'Bật':'Tắt'}</b></div><button data-a="auto">Đổi</button></div>`;
+ if(k=='staff')h=hd('Nhân viên')+`<div class="r"><div><b>Học viện bán hàng · ${S.train}/12</b><br>+6% hiệu suất và +1.5% đi bộ mỗi cấp. Đào tạo 30s, đội ngũ vẫn làm việc.<br>${S.training?'Còn '+Math.ceil(S.training)+'s':'Sẵn sàng'}</div><button data-a="train" ${S.training||S.train>=12||S.money<trainCost()?'disabled':''}>${S.train>=12?'Tối đa':fm(trainCost())}</button></div>`+rw('Tốc độ tư vấn',S.spd,6,'+30% tốc độ phục vụ và thanh toán','spd')+rw('Tuyển nhân viên',S.staff,3,'Phục vụ thêm 1 khách cùng lúc','hire')+staff.map((s,i)=>`<div class="r"><div>Nhân viên ${i+1}: <b>${STN[s.st]}</b></div></div>`).join('');
+ if(k=='mis'){const m=MIS[S.mi];h=hd('Nhiệm vụ ('+S.mi+'/'+MIS.length+')')+(m?`<div class="r"><div><b>${m.t}</b><br>Thưởng ${fm(m.r)} + 2 KC<div class="bar"><i style="width:${Math.min(100,MV()[m.k]/m.n*100)}%"></i></div></div><b>${Math.floor(Math.min(MV()[m.k],m.n))}/${m.n}</b></div>`:'<div class="r"><div>Đã hoàn thành tất cả!</div></div>')+MIS.slice(S.mi+1).map(x=>`<div class="r"><div>${x.t}</div></div>`).join('')}
+ if(k=='menu')h=hd('Quản lý v6')+`<div class="r"><div><b>Tổng quan lợi nhuận</b><br>Xe ${fm(S.stats.cars)} · Gara ${fm(S.stats.garage)}<br>Lái thử ${fm(S.stats.test)} · Offline ${fm(S.stats.offline)}<br>Chi vận hành ${fm(S.ops)} · Lãi ròng ${fm(S.profit-S.ops)}<br>Lãi ròng 24 giờ: ${fm(S.history.filter(x=>x.hour>Math.floor(Date.now()/3600000)-24).reduce((n,x)=>n+x.profit,0))}<br>Phân tích từ v6; tổng lãi kế thừa v5 được giữ.</div></div><div class="r"><div>Hình ảnh: ${S.quality} · Lưu tự động 5s</div><button data-a="quality">Đổi</button><button data-a="save">Lưu</button></div>`+`<div class="r"><div><b>Chính sách giá</b><br>Hài lòng: ${Math.round(S.satisfaction)}% · ${S.policy==='value'?'Giá tốt −2.5%':S.policy==='premium'?'Cao cấp +4%':'Cân bằng'}<br>Giá cao cần khách có ngân sách phù hợp.</div><button data-a="policy">Đổi</button></div>`+`<div class="r"><div><b>Quảng cáo</b><br>Khách đến nhanh ×1.7 trong 2 phút (còn ${Math.ceil(S.mkt)}s)</div><button data-a="ads" ${S.money<750||S.mkt>480?'disabled':''}>${fm(750)}</button></div><div class="r"><div>Đổi 5 KC lấy ${fm(2500)} (có ${S.gems} KC)</div><button data-a="gem" ${S.gems<5?'disabled':''}>Đổi</button></div>`+
+  `<div class="r"><div>Doanh thu: <b>${fm(S.rev)}</b> · Lợi nhuận: <b>${fm(S.profit)}</b><br>Xe đã bán: <b>${S.sold}</b> · Khách: <b>${S.served}</b> · VIP: <b>${S.vip}</b> · Lái thử: <b>${S.tdN}</b> · Sửa xe: <b>${S.garN}</b><br>Lợi nhuận/phút: <b>${fm(S.rpm)}</b> · Danh tiếng: <b>${Math.floor(S.rep)}</b> · Cấp: <b>${S.lvl}</b></div></div>`+
+  `<div class="r"><div>Âm thanh: <b>${S.snd?'Bật':'Tắt'}</b></div><button data-a="snd">Đổi</button></div><div class="r"><div>Xóa tiến trình, chơi lại</div><button data-a="reset">Reset</button></div>`;
+ if(k==='inv')h+=`<div class="r"><div><b>XE CŨ • Tuyển chọn</b><br>Mua $1,800 · kiểm định và bán tự động $2,600 sau 40s. Đang xử lý ${S.used}/3.</div><button data-a="used" ${S.money<1800||S.used>=3?'disabled':''}>Mua xe cũ</button></div><div class="r"><div><b>ĐƠN ĐẶT RIÊNG</b><br>Khách trả thêm 12%. Cần xe trong kho sau 45s; xe trưng bày không bị lấy.</div><button data-a="order" ${S.orders.length>=3?'disabled':''}>Nhận đơn</button></div>`+S.orders.map(o=>`<div class="r"><div>Đơn #${o.id} · ${CARS[o.k].n}<br>${o.elapsed<45?'Chuẩn bị '+Math.ceil(45-o.elapsed)+'s':'Đợi nhập xe vào kho'}</div></div>`).join('');
+ return h}
+// Preserve live controls and scroll position during ticking status updates.
+function patchNode(a,b){
+ if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.replaceWith(b.cloneNode(true));return}
+ if(a.nodeType===3){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return}
+ if(a.nodeType!==1)return;
+ for(const attr of [...a.attributes])if(!b.hasAttribute(attr.name))a.removeAttribute(attr.name);
+ for(const attr of [...b.attributes])if(a.getAttribute(attr.name)!==attr.value)a.setAttribute(attr.name,attr.value);
+ const aa=[...a.childNodes],bb=[...b.childNodes];
+ for(let i=0;i<Math.max(aa.length,bb.length);i++){
+  if(!bb[i])aa[i].remove();else if(!aa[i])a.appendChild(bb[i].cloneNode(true));else patchNode(aa[i],bb[i]);
+ }
+}
+function refreshP(f){if(!cur)return;const h=ph(cur);if(f||P.dataset.h!==h){P.dataset.h=h;
+ if(f)P.innerHTML=h;else{const temp=document.createElement('div');temp.innerHTML=h;
+ const old=[...P.childNodes],fresh=[...temp.childNodes];
+ for(let i=0;i<Math.max(old.length,fresh.length);i++){if(!fresh[i])old[i].remove();else if(!old[i])P.appendChild(fresh[i].cloneNode(true));else patchNode(old[i],fresh[i])}
+ }}}
+function openP(k){cur=k;P.dataset.h='';refreshP(1);P.classList.add('on')}
+function closeP(){P.classList.remove('on');cur=null}
+P.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;audio();const d=b.dataset;
+ if(!owner)return;if(d.a==='train')startTraining();if(d.p){const [k,n]=d.p.split(':');adjustPrice(k,Number(n))}if(d.a==='save'){save(true);toast(storageOK?'Đã lưu tiến trình':'Không thể lưu')}if(d.a==='quality'){S.quality={auto:'eco',eco:'high',high:'auto'}[S.quality];setQuality();save();refreshP(1)}if(d.a==='used')buyUsed();if(d.a==='order')orderCar();if(d.u)up(d.u);if(d.b){const a=d.b.split(':');buyStock(a[0],+a[1])}
+ if(d.a==='policy'){S.policy={balanced:'value',value:'premium',premium:'balanced'}[S.policy];save();refreshP(1)}if(d.a=='close')closeP();if(d.a=='snd'){S.snd^=1;save();refreshP(1)}if(d.a=='auto'){S.auto^=1;save();refreshP(1)}
+ if(d.a=='ads'&&S.money>=750&&S.mkt<=480){S.money-=750;recordExpense(750);S.mkt=Math.min(600,S.mkt+120);S.mktN++;beep(700,.15);save();refreshP(1)}
+ if(d.a=='gem'&&S.gems>=5){S.gems-=5;S.money+=2500;beep(900,.15);save();refreshP(1)}
+ if(d.a=='reset'&&confirm('Xóa toàn bộ tiến trình?')){try{localStorage.removeItem('aet6');localStorage.removeItem('aet6-backup');localStorage.removeItem('aet5');localStorage.removeItem('aet1')}catch(x){}location.reload()}});
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;audio();const k=b.dataset.o;if(cur==k)closeP();else{focus(k);openP(k)}});
+$('mb').addEventListener('click',()=>openP('mis'));
+function hud(){$('money').textContent=fm(S.money);$('gems').textContent='💎 '+S.gems;$('rep').textContent='★ '+Math.floor(S.rep)+(S.mkt>0?' 📢':'');$('lvt').textContent='Cấp '+S.lvl;$('xpf').style.width=Math.min(100,S.xp/need(S.lvl)*100)+'%';chkMis();
+ const m=MIS[S.mi];$('mb').textContent=m?'🎯 '+m.t+' ('+Math.floor(Math.min(MV()[m.k],m.n))+'/'+m.n+')':'🎯 Hoàn thành tất cả nhiệm vụ';refreshP()}

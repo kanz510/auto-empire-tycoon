@@ -1,5 +1,10 @@
-const CACHE='auto-empire-v7-1';
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg'])).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('auto-empire-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;
-e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(e.request,copy)))}return r}).catch(()=>caches.match(e.request).then(r=>r||(e.request.mode==='navigate'?caches.match('./index.html'):Response.error()))))});
+const BUILD="1e73d0e9c68bef9d",CACHE='auto-empire-v8-'+BUILD,FILES=["./", "./index.html", "./release.json", "./manifest.webmanifest", "./assets/icon.svg", "./dist/game.5c96a5f5a4f3a907.js", "./dist/game.e5c293de50841b5b.css", "./vendor/three-r128.min.js?v=9274bbcec8d96168", "./dist/manifest.e8811bd13e484d88.webmanifest", "./dist/icon.d9c4c0898aa45b72.svg"];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(async file=>{const url=new URL(file,self.location.href);url.searchParams.set('__build',BUILD);const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Incomplete release');if(file==='./release.json'&&(await response.clone().json()).build!==BUILD)throw Error('Mixed release');if(file==='./index.html'&&!(await response.clone().text()).includes(BUILD))throw Error('Stale shell');await c.put(file,response)}))).catch(async err=>{await caches.delete(CACHE);throw err})));
+self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting()});
+self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();const old=keys.filter(k=>k.startsWith('auto-empire-')&&k!==CACHE);for(const k of old.slice(0,-1))await caches.delete(k);await self.clients.claim()})()));
+self.addEventListener('fetch',e=>{
+ const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin)return;
+ if(u.pathname.endsWith('/release.json')){e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.open(CACHE).then(c=>c.match('./release.json'))));return}
+ if(e.request.mode==='navigate'){e.respondWith(caches.open(CACHE).then(async c=>(await c.match('./index.html'))||fetch(e.request,{cache:'no-store'})));return}
+ e.respondWith(caches.open(CACHE).then(async c=>(await c.match(e.request))||fetch(e.request)));
+});
