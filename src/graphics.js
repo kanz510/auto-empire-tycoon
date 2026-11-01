@@ -2,18 +2,16 @@
 const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
 let adaptiveDpr=Math.min(devicePixelRatio,1.5),qualityClock=0,qualityFrames=0;
 function setQuality(){ren.setPixelRatio(S.quality==='eco'?1:S.quality==='high'?Math.min(devicePixelRatio,1.75):adaptiveDpr);ren.shadowMap.enabled=S.quality!=='eco';fit()}
-const scene=new THREE.Scene();scene.background=new THREE.Color(0xbfe3dd);scene.fog=new THREE.FogExp2(0xbfe3dd,0.012);
-scene.add(new THREE.HemisphereLight(0xffffff,0x445544,.45));
-const sun=new THREE.DirectionalLight(0xfffaed,.95);sun.position.set(30,45,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-35,right:35,top:35,bottom:-35,near:.5,far:120});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.02;scene.add(sun);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fd4f0);scene.fog=new THREE.Fog(0x9fd4f0,95,170);
+scene.add(new THREE.HemisphereLight(0xdff1ff,0x6a8f5a,.7));
+const sun=new THREE.DirectionalLight(0xfff0d0,.85);sun.position.set(25,40,15);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,far:120});scene.add(sun);
 const fill=new THREE.DirectionalLight(0x9ec8ff,.25);fill.position.set(-20,15,-10);scene.add(fill);
-const showroomSpot=new THREE.SpotLight(0xffffff,.8);showroomSpot.position.set(0,18,0);showroomSpot.angle=Math.PI/5;showroomSpot.penumbra=.6;showroomSpot.decay=2;showroomSpot.distance=30;scene.add(showroomSpot);scene.add(showroomSpot.target);
 const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.0:1,T=new V(portraitFocus?(S.show>=2?10.5:5.5):0,0,portraitFocus?-1:2),TT=T.clone();
 function fit(){ren.setSize(innerWidth,innerHeight);const a=innerWidth/innerHeight,W=(a<1?36:54)/zoom,H=W/a;cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);
 const BOX_GEOMETRY={};
 const box=(w,h,d,c,x,y,z,o)=>{const key=w+","+h+","+d,geometry=BOX_GEOMETRY[key]||(BOX_GEOMETRY[key]=new THREE.BoxGeometry(w,h,d));const m=new THREE.Mesh(geometry,M(c,o));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m};
 const hit=[];function key(g,k){g.traverse(o=>o.userData.key=k);hit.push(g);scene.add(g);return g}
-function applyMeshShadows(model){if(!model)return;model.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;if(o.material)o.material.roughness=Math.max(o.material.roughness||.5,.35)}})}
 scene.add(box(160,1,160,0x7cc36a,0,-.5,0),box(160,.1,4.4,0x3a3f47,0,.05,12.7));
 for(let x=-70;x<70;x+=4)scene.add(box(1.8,.02,.2,0xffffff,x,.11,12.7));
 const park=new THREE.Group();park.add(box(30,.12,8,0x555b66,0,.06,6.6));
