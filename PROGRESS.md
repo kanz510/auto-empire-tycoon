@@ -47,3 +47,11 @@
 - `tests/living-city-v12.cjs` verifies 390×844 / 440×956, non-interactivity, no economic mutation and same-origin asset paths.
 - New hashed assets are precached by the existing PWA builder. Visual screenshots are stored in `docs/screenshots/`.
 - **Safari on a physical iPhone has not been tested**; user can verify the published main deployment.
+
+## V12.1 Premium Lighting & Vehicle Materials (2026-11-02)
+- Renderer: retained Three.js r128 sRGB output and PCFSoftShadowMap, enabled ACES Filmic Tone Mapping with exposure 1.15. Quality 'eco' still disables shadows by existing user preference.
+- Car paint: physical clearcoat (1.0, roughness 0.04) using MeshPhysicalMaterial for the GLB body with the V11.2 per-color colormap clone, no loss of wheels, lamp atlas, trim or showroom colors. Distinct glass/chrome meshes, if present in future GLBs, receive corresponding cached materials.
+- Kenney current car body includes windows in the same atlas and has no standalone glass mesh. Physical transmission cannot be applied separately to those windows without splitting geometry; dark mapped windows remain visually intact.
+- Existing showroom floor is in src/graphics.js rather than showroom-v11.js. Set mapped floor roughness 0.22, metalness 0.12, envMapIntensity 1.0. No environment map provided, so this is a specular floor, not a true mirror/reflection renderer.
+- Added tests/physical-polish-v12.cjs to assert ACES/soft shadows, physical body materials, distinct car paint colors, wheel/map preservation, and save-safe changes in Chromium 440x956 / 390x844.
+- No gameplay, income, customer AI, save key, or player UI changes. Real iPhone Safari remains untested.

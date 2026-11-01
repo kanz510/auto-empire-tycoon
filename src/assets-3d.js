@@ -55,7 +55,16 @@ function paintForBody(body,k,hex){
  if(count===0)throw Error('Paint swatch has no atlas pixels '+k);
  ctx.putImageData(img,0,0);
  const map=texture.clone();map.image=canvas;map.needsUpdate=true;
- const mat=source.clone();mat.map=map;paintMaterialCache.set(id,mat);
+ // Preserve the hashed Kenney colormap so the body retains the requested
+ // color while windows, lamps and wheel meshes keep their original UVs.
+ // Clearcoat affects the car paint only, not the whole vehicle.
+ const mat=new THREE.MeshPhysicalMaterial({
+  map:map,color:source.color.clone(),side:source.side,
+  transparent:source.transparent,opacity:source.opacity,alphaTest:source.alphaTest,
+  vertexColors:source.vertexColors,
+  roughness:.18,metalness:.75,clearcoat:1.0,clearcoatRoughness:.04
+ });
+ paintMaterialCache.set(id,mat);
  return mat;
 }
 function vehiclePaint(root,k,col){
@@ -65,6 +74,34 @@ function vehiclePaint(root,k,col){
  if(original)return original.material.color.clone().convertLinearToSRGB().getHex();
  return CARS[k].col;
 }
+// Only distinct glass/chrome meshes may receive separate physical materials.
+ // Kenney's current 'body' mesh also contains mapped windows: never turn
+ // that entire mesh transparent (it would destroy the per-car paint atlas).
+const premiumGlassCache=new WeakMap(),premiumChromeCache=new WeakMap();
+function upgradeVehicleSurface(node){
+ if(!node.isMesh||!node.material||Array.isArray(node.material))return;
+ const name=(node.name||'').toLowerCase();
+ const source=node.material,matName=(source.name||'').toLowerCase();
+ if(/glass|window/.test(name)){
+  let mat=premiumGlassCache.get(source);
+  if(!mat){
+   mat=new THREE.MeshPhysicalMaterial({
+    color:0x112233,map:source.map,side:source.side,
+    transparent:true,opacity:.65,transmission:.85,ior:1.5,
+    roughness:.05,metalness:.1,depthWrite:false
+   });
+   premiumGlassCache.set(source,mat);
+  }
+  node.material=mat;
+ }else if(/rim|chrome/.test(name)||(/chrome/.test(matName)&&!/wheel/.test(name))){
+  let mat=premiumChromeCache.get(source);
+  if(!mat){
+   mat=new THREE.MeshStandardMaterial();mat.copy(source);
+   mat.metalness=.95;mat.roughness=.1;premiumChromeCache.set(source,mat);
+  }
+  node.material=mat;
+ }
+}
 function applyVehicleAsset(root,k,col){
  const template=vehicleTemplates[k];
  if(!template)return false;
@@ -73,7 +110,7 @@ function applyVehicleAsset(root,k,col){
  copy.scale.setScalar(k==='sport'?1.48:1.51);
  const wheels=[];
  copy.traverse(o=>{
-  if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
+  if(o.isMesh){o.castShadow=true;o.receiveShadow=true;upgradeVehicleSurface(o);}
   if(/^wheel-/.test(o.name)){o.userData.kenneyWheel=true;wheels.push(o)}
  });
  if(wheels.length!==4)return false; // Keep the working procedural fallback if source changes.

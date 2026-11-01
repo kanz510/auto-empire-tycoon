@@ -1,5 +1,5 @@
 // ---------- cảnh
-const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;document.body.prepend(ren.domElement);
+const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
 let adaptiveDpr=Math.min(devicePixelRatio,1.5),qualityClock=0,qualityFrames=0;
 function setQuality(){ren.setPixelRatio(S.quality==='eco'?1:S.quality==='high'?Math.min(devicePixelRatio,1.75):adaptiveDpr);ren.shadowMap.enabled=S.quality!=='eco';fit()}
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fd4f0);scene.fog=new THREE.Fog(0x9fd4f0,95,170);
@@ -23,7 +23,7 @@ tex.encoding=THREE.sRGBEncoding;
 const floorImage=new Image();floorImage.onload=()=>{tc.width=tc.height=256;tx.drawImage(floorImage,0,0,256,256);tx.strokeStyle='rgba(65,55,45,.16)';tx.lineWidth=1;tx.strokeRect(.5,.5,255,255);tex.needsUpdate=true};
 floorImage.src=ART['showroom-floor'];
 
-const fl=box(30,.3,13,0xffffff,0,.15,-4.5);fl.material=new THREE.MeshStandardMaterial({map:tex,roughness:.12,metalness:.25});sh.add(fl,box(30,4.5,.4,0xb0bec5,0,2.25,-11));
+const fl=box(30,.3,13,0xffffff,0,.15,-4.5);fl.material=new THREE.MeshStandardMaterial({map:tex,roughness:.22,metalness:.12,envMapIntensity:1.0});sh.add(fl,box(30,4.5,.4,0xb0bec5,0,2.25,-11));
 [-9,0,9].forEach(x=>sh.add(box(6,.25,.1,0xffffff,x,3.6,-10.7,{emissive:0xffffff})));
 const glass={transparent:true,opacity:.22,roughness:.05,metalness:.2};
 sh.add(box(13.5,3.4,.2,0x9fd8ff,-8.25,1.9,2,glass),box(13.5,3.4,.2,0x9fd8ff,8.25,1.9,2,glass),box(.2,3.4,13,0x9fd8ff,-15,1.9,-4.5,glass),box(.2,3.4,13,0x9fd8ff,15,1.9,-4.5,glass),
