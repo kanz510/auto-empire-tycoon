@@ -12,7 +12,7 @@ browser=await chromium.launch({headless:true,...(process.env.BROWSER_BIN?{execut
 const context=await browser.newContext({viewport:{width:440,height:956},isMobile:true,hasTouch:true,deviceScaleFactor:2});
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.goto('http://127.0.0.1:'+server.address().port+'/');
-await page.waitForFunction(()=>typeof S!=='undefined');
+await page.waitForFunction(()=>typeof S!=='undefined',{timeout:15000}).catch(e=>{console.error('STARTUP PAGE ERRORS:',errors);throw e});
 const result=await page.evaluate(()=>{
 S.money=250000;S.auto=0;const start=S.money,cost=stockCost('hatch');buyStock('hatch',5);
 const buy=Math.abs(start-S.money-cost*5)<.01;up('show');up('hire');up('td');up('gar');startTraining();
