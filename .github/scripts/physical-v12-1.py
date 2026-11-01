@@ -21,10 +21,12 @@ replace_once("src/assets-3d.js",
     """// Preserve the hashed Kenney colormap so the body retains the requested
  // color while windows, lamps and wheel meshes keep their original UVs.
  // Clearcoat affects the car paint only, not the whole vehicle.
- const mat=new THREE.MeshPhysicalMaterial();mat.copy(source);
- mat.map=map;
- mat.metalness=.75;mat.roughness=.18;
- mat.clearcoat=1.0;mat.clearcoatRoughness=.04;
+ const mat=new THREE.MeshPhysicalMaterial({
+  map:map,color:source.color.clone(),side:source.side,
+  transparent:source.transparent,opacity:source.opacity,alphaTest:source.alphaTest,
+  vertexColors:source.vertexColors,
+  roughness:.18,metalness:.75,clearcoat:1.0,clearcoatRoughness:.04
+ });
  paintMaterialCache.set(id,mat);""")
 
 replace_once("src/assets-3d.js",
@@ -40,10 +42,11 @@ function upgradeVehicleSurface(node){
  if(/glass|window/.test(name)){
   let mat=premiumGlassCache.get(source);
   if(!mat){
-   mat=new THREE.MeshPhysicalMaterial();mat.copy(source);
-   mat.color.setHex(0x112233);
-   mat.transparent=true;mat.opacity=.65;mat.transmission=.85;
-   mat.ior=1.5;mat.roughness=.05;mat.metalness=.1;mat.depthWrite=false;
+   mat=new THREE.MeshPhysicalMaterial({
+    color:0x112233,map:source.map,side:source.side,
+    transparent:true,opacity:.65,transmission:.85,ior:1.5,
+    roughness:.05,metalness:.1,depthWrite:false
+   });
    premiumGlassCache.set(source,mat);
   }
   node.material=mat;
