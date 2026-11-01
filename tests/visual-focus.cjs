@@ -17,10 +17,12 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
   await page.goto('http://127.0.0.1:'+server.address().port+'/');await page.waitForFunction(()=>typeof zoom==='number'&&typeof S!=='undefined');
   const state=await page.evaluate(()=>{
    const district=scene.getObjectByName('living-district');
-   return {zoom,targetZ:TT.z,decorCount:district?.children.length||0,instanced:district?.children.filter(c=>c.isInstancedMesh).length||0};
+   const bounds=[[-15,-11],[-15,2],[15,-11],[15,2]].map(([x,z])=>new THREE.Vector3(x,0,z).project(cam).x);
+   return {zoom,targetZ:TT.z,targetX:TT.x,left:Math.min(...bounds),right:Math.max(...bounds),decorCount:district?.children.length||0,instanced:district?.children.filter(c=>c.isInstancedMesh).length||0};
   });
-  assert.ok(state.zoom>=1.35&&state.zoom<=1.8,'mobile zoom should fill the center: '+JSON.stringify(state));
-  assert.ok(state.targetZ>=5,'the dealership should be centered above the bottom controls');
+  assert.ok(state.zoom>=1.07&&state.zoom<=1.15,'camera should preserve the full dealership on portrait screens: '+JSON.stringify(state));
+  assert.ok(state.targetZ>=0&&state.targetZ<=2.5&&state.targetX>=4,'the dealership should be centered rather than the roadside');
+  assert.ok(state.left>-.95&&state.right<.95,'showroom front and back must fit the phone viewport: '+JSON.stringify(state));
   assert.ok(state.decorCount>=3&&state.instanced>=2,'district decorations should use instancing');
   await page.locator('[data-o="show"]').tap();assert.ok(await page.locator('#P.on').count());
   assert.deepEqual(errors,[]);
