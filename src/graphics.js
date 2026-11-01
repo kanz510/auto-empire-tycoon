@@ -9,7 +9,8 @@ const fill=new THREE.DirectionalLight(0x9ec8ff,.25);fill.position.set(-20,15,-10
 const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);let zoom=1,T=new V(0,0,2),TT=T.clone();
 function fit(){ren.setSize(innerWidth,innerHeight);const a=innerWidth/innerHeight,W=(a<1?36:54)/zoom,H=W/a;cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);
-const box=(w,h,d,c,x,y,z,o)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,o));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m};
+const BOX_GEOMETRY={};
+const box=(w,h,d,c,x,y,z,o)=>{const key=w+","+h+","+d,geometry=BOX_GEOMETRY[key]||(BOX_GEOMETRY[key]=new THREE.BoxGeometry(w,h,d));const m=new THREE.Mesh(geometry,M(c,o));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m};
 const hit=[];function key(g,k){g.traverse(o=>o.userData.key=k);hit.push(g);scene.add(g);return g}
 scene.add(box(160,1,160,0x7cc36a,0,-.5,0),box(160,.1,4.4,0x3a3f47,0,.05,12.7));
 for(let x=-70;x<70;x+=4)scene.add(box(1.8,.02,.2,0xffffff,x,.11,12.7));
@@ -17,6 +18,11 @@ const park=new THREE.Group();park.add(box(30,.12,8,0x555b66,0,.06,6.6));
 const PX=[-2,2,-6,6,-10,10],pmark=PX.map(x=>{const a=box(.12,.02,4.4,0xffffff,x+2,.14,7),b=box(.12,.02,4.4,0xffffff,x-2,.14,7);park.add(a,b);return[a,b]});key(park,'park');
 const sh=new THREE.Group(),tc=document.createElement('canvas');tc.width=tc.height=64;const tx=tc.getContext('2d');tx.fillStyle='#eef2f7';tx.fillRect(0,0,64,64);tx.fillStyle='#cfd8e3';tx.fillRect(0,0,32,32);tx.fillRect(32,32,32,32);
 const tex=new THREE.CanvasTexture(tc);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(15,6.5);
+// One local Canva albedo, reused through the existing GPU texture; checkerboard is the load-failure fallback.
+tex.encoding=THREE.sRGBEncoding;
+const floorImage=new Image();floorImage.onload=()=>{tc.width=tc.height=256;tx.drawImage(floorImage,0,0,256,256);tx.strokeStyle='rgba(65,55,45,.16)';tx.lineWidth=1;tx.strokeRect(.5,.5,255,255);tex.needsUpdate=true};
+floorImage.src=ART['showroom-floor'];
+
 const fl=box(30,.3,13,0xffffff,0,.15,-4.5);fl.material=new THREE.MeshStandardMaterial({map:tex,roughness:.12,metalness:.25});sh.add(fl,box(30,4.5,.4,0xb0bec5,0,2.25,-11));
 [-9,0,9].forEach(x=>sh.add(box(6,.25,.1,0xffffff,x,3.6,-10.7,{emissive:0xffffff})));
 const glass={transparent:true,opacity:.22,roughness:.05,metalness:.2};
@@ -46,7 +52,8 @@ const PT=[],pg=new THREE.SphereGeometry(.12,6,4),pmt=new THREE.MeshBasicMaterial
 for(let i=0;i<24;i++){const m=new THREE.Mesh(pg,pmt);m.visible=false;scene.add(m);PT.push({m,v:new V(),l:0})}
 function burst(p){let n=0;PT.forEach(q=>{if(q.l<=0&&n<12){n++;q.l=1;q.m.visible=true;q.m.position.set(p.x,2,p.z);q.v.set((R()-.5)*5,4+R()*3,(R()-.5)*5)}})}
 // ---------- camera (đã sửa lệch kéo)
-function updCam(){T.lerp(TT,.12);cam.position.copy(T).add(new V(1,1.05,1).multiplyScalar(45));cam.lookAt(T)}
+const cameraOffset=new V(1,1.05,1).multiplyScalar(45);
+function updCam(){T.lerp(TT,.12);cam.position.copy(T).add(cameraOffset);cam.lookAt(T)}
 const ptr=new Map(),cvs=ren.domElement,ray=new THREE.Raycaster(),RT=new V(1,0,-1).normalize(),FW=new V(-1,0,-1).normalize();let down=null,pd=0;
 cvs.addEventListener('pointerdown',e=>{cvs.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);down=[e.clientX,e.clientY,0];if(ptr.size==2){const p=[...ptr.values()];pd=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);down[2]=99}audio()});
 cvs.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const o=ptr.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];ptr.set(e.pointerId,[e.clientX,e.clientY]);

@@ -7,7 +7,7 @@ function addXP(x){S.xp+=x;while(S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;S.g
 function up(k){if(!COST[k])return;if(LVL()[k]>=MAXL[k])return;const c=COST[k]();if(S.money<c){toast('Không đủ tiền');return}
  S.money-=c;if(k=='show')S.show++;if(k=='park')S.park++;if(k=='spd')S.spd++;if(k=='hire'){S.staff++;addStaff(S.staff-1)}if(k=='td')S.td++;if(k=='gar')S.gar++;
  applyVis();fillSlots();beep(660,.15);setTimeout(()=>beep(990,.2),120);toast('Nâng cấp thành công!');save();refreshP(1)}
-function buyStock(k,n){if(!CARS[k]||!Number.isInteger(n)||n<1||n>5)return;const c=CARS[k];if(c.lv>S.show)return;if(STK()+n>CAP()){toast('Kho đầy ('+CAP()+' xe)');return}if(S.money<stockCost(k)*n){toast('Không đủ tiền');return}const paid=stockCost(k);S.basis[k]=(S.basis[k]*S.inv[k]+paid*n)/(S.inv[k]+n);S.money-=paid*n;S.inv[k]+=n;S.bought+=n;beep(520,.1);fillSlots();save();refreshP(1)}
+function buyStock(k,n){if(!CARS[k]||!Number.isInteger(n)||n<1||n>5)return;const c=CARS[k];if(c.lv>S.show)return;if(STK()+n>CAP()){toast('Kho đầy ('+CAP()+' xe)');return}if(S.money<stockCost(k)*n){toast('Không đủ tiền');return}const paid=stockCost(k);S.basis[k]=(S.basis[k]*S.inv[k]+paid*n)/(S.inv[k]+n);S.money-=paid*n;S.inv[k]+=n;S.bought+=n;beep(520,.1);updateOrders(0);fillSlots();save();refreshP(1)}
 function applyVis(){u2.visible=S.show>=2;u3.visible=S.show>=3;sign.material.color.set(S.show>=3?0xffd54f:S.show>=2?0x64b5f6:0xffffff);sign.material.emissive.set(S.show>=3?0x7a5a00:S.show>=2?0x103a66:0x555555);
  pmark.forEach((m,i)=>{m[0].visible=m[1].visible=i<NPK()});lamps.visible=S.park>=2;tdG.visible=S.td>0;garG.visible=S.gar>0;ped.forEach((p,i)=>p.visible=i<NSL())}
 const sales=[];let t0=performance.now();

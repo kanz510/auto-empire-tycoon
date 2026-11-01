@@ -36,3 +36,10 @@ First successful online installation is required for offline reopening. Storage 
 `npm install && npx playwright install chromium && npm test`.
 Optional `BROWSER_BIN=/usr/bin/chromium`, `SOAK_SECONDS=600`.
 See VALIDATION-v8.md. Physical Safari/iPhone testing remains necessary for platform-specific storage/termination behavior.
+
+## Mobile polish and verified integrations
+This small follow-up uses an editable Figma management reference and a 200×200 Canva-generated limestone tile, stored locally and copied to a content-addressed PNG. The game does not call those providers at runtime. Native system typography is retained; the Figma prototype uses Inter because its SF Pro renderer returned zero-width glyphs.
+
+Ready orders now consume newly imported warehouse stock before empty display slots. Price formulas, timers, save names, offline calculations and automatic management remain unchanged. Same-size static box meshes share geometry; the camera offset is reused rather than allocated each frame.
+
+See PLUGIN-VALIDATION.md for provenance, availability and observed browser checks. The canceled cache/session rewrite is not included in this release.

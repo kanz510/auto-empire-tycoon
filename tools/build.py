@@ -3,7 +3,11 @@ import hashlib,json,shutil
 r=Path(__file__).resolve().parents[1]
 order=['models','save-state','graphics','economy','gameplay','ai','ui','main','lifecycle']
 digest=lambda b:hashlib.sha256(b).hexdigest()[:16]
-game=''.join((r/f'src/{n}.js').read_text() for n in order).encode()
+out=r/'dist';out.mkdir(exist_ok=True)
+art={}
+for asset in sorted((r/'assets').glob('*.png')):
+ data=asset.read_bytes();name=asset.stem+'.'+digest(data)+'.png';(out/name).write_bytes(data);art[asset.stem]='./dist/'+name
+game=('const ART='+json.dumps(art)+';\n'+''.join((r/f'src/{n}.js').read_text() for n in order)).encode()
 css=(r/'styles/game.css').read_bytes();vendor=(r/'vendor/three-r128.min.js').read_bytes()
 # Build identity is deterministic across all source, assets and build tooling.
 inputs=sorted(p for folder in ['src','styles','vendor','assets','tools'] for p in (r/folder).rglob('*') if p.is_file() and '__pycache__' not in str(p))
@@ -20,7 +24,7 @@ shell=(r/'src/shell.html').read_text().replace('</body>',f'<script>{boot}</scrip
 (r/'index.html').write_text(shell)
 (r/'release.json').write_text(json.dumps(release))
 manifest=(r/'assets/manifest.webmanifest').read_text();(r/'manifest.webmanifest').write_text(manifest)
-files=['./','./index.html','./release.json','./manifest.webmanifest','./assets/icon.svg',release['game'],release['css'],release['vendor'],release['manifest'],'./dist/'+icon_name]
+files=['./','./index.html','./release.json','./manifest.webmanifest','./assets/icon.svg',release['game'],release['css'],release['vendor'],release['manifest'],'./dist/'+icon_name]+list(art.values())
 sw="""const BUILD=__BUILD__,CACHE='auto-empire-v8-'+BUILD,FILES=__FILES__;
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(async file=>{const url=new URL(file,self.location.href);url.searchParams.set('__build',BUILD);const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Incomplete release');if(file==='./release.json'&&(await response.clone().json()).build!==BUILD)throw Error('Mixed release');if(file==='./index.html'&&!(await response.clone().text()).includes(BUILD))throw Error('Stale shell');await c.put(file,response)}))).catch(async err=>{await caches.delete(CACHE);throw err})));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting()});

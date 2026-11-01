@@ -1,15 +1,30 @@
-name: Verify reproducible release
+name: Build and mobile regression
 on: [push, pull_request]
 permissions:
   contents: read
 jobs:
-  build:
+  regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
       - run: python tools/build.py
       - run: git diff --exit-code -- index.html release.json sw.js manifest.webmanifest dist/
       - run: test -z "$(git ls-files --others --exclude-standard dist/)"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Gameplay, mobile management and offline
+        run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-test-artifacts
+          path: test-results/
+          if-no-files-found: ignore

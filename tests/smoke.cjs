@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),http=require('node:http'),fs=require(
 const root=path.resolve(__dirname,'..');
 const allowed=new Set(['/','/index.html','/sw.js','/manifest.webmanifest','/icon.svg']);
 const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://localhost');if(!(allowed.has(url.pathname)||/^\/(dist|vendor|assets)\/[a-zA-Z0-9_.-]+$/.test(url.pathname)||url.pathname==='/release.json')){res.writeHead(404).end();return}
-const file=url.pathname==='/'?'index.html':url.pathname.slice(1);res.setHeader('Content-Type',file.endsWith('.css')?'text/css':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'text/javascript':file.endsWith('.webmanifest')?'application/manifest+json':'text/html');res.end(fs.readFileSync(path.join(root,file)))});
+const file=url.pathname==='/'?'index.html':url.pathname.slice(1);res.setHeader('Content-Type',file.endsWith('.png')?'image/png':file.endsWith('.css')?'text/css':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'text/javascript':file.endsWith('.webmanifest')?'application/manifest+json':'text/html');res.end(fs.readFileSync(path.join(root,file)))});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
 try{
 browser=await chromium.launch({headless:true,...(process.env.BROWSER_BIN?{executablePath:process.env.BROWSER_BIN}:{}),args:['--no-sandbox','--enable-unsafe-swiftshader']});
@@ -20,14 +20,14 @@ for(let i=0;i<601;i++)simulate(.05);
 const trained=S.train===1;buyUsed();for(let i=0;i<801;i++)simulate(.05);const used=S.used===0;
 orderCar();const key=S.orders[0].k;S.inv[key]+=10;for(let i=0;i<901;i++)simulate(.05);const orders=S.orders.length===0;S.sold=Math.max(1,S.sold);S.rpm=600;S.t=Date.now()-120000;
 const before=S.money;claimOffline();const credited=S.money>before,once=S.money;claimOffline();
-const offline=S.money===once;S.xp=25.75;save(true);return {used,orders,buy,trained,credited,offline,show:S.show};
+const offline=S.money===once;S.xp=25.75;save(true);Object.defineProperty(document,'hidden',{value:true,configurable:true});return {used,orders,buy,trained,credited,offline,show:S.show};
 });
 assert.equal(result.used,true);assert.equal(result.orders,true);assert.equal(result.buy,true);assert.equal(result.trained,true);assert.equal(result.credited,true);assert.equal(result.offline,true);assert.equal(result.show,2);
 await page.reload();await page.waitForFunction(()=>typeof S!=='undefined');assert.equal(await page.evaluate(()=>S.train),1);assert.equal(await page.evaluate(()=>S.xp),25.75);
 await page.evaluate(()=>{S.mi=MIS.length;$('modal').style.display='none'});await page.locator('[data-o="menu"]').tap();await page.locator('[data-a="ads"]').tap();await page.locator('[data-a="save"]').tap();
 await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);
 await context.setOffline(true);await page.reload();await page.waitForFunction(()=>typeof S!=='undefined');assert.match(await page.title(),/v8/);await context.setOffline(false);
-const second=await context.newPage();await second.goto(page.url());assert.equal(await second.evaluate(()=>owner),false);await second.close();
+const second=await context.newPage();await second.goto(page.url());await second.waitForFunction(()=>typeof owner!=='undefined');assert.equal(await second.evaluate(()=>owner),false);await second.close();
 const soak=Math.max(0,Number(process.env.SOAK_SECONDS)||0);
 await page.waitForTimeout(soak*1000);
 assert.equal(await page.evaluate(()=>Number.isFinite(S.money)&&S.money>=0&&slots.every(d=>!d.res||custs.includes(d.res))),true);

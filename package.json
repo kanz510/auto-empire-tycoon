@@ -1,1 +1,1 @@
-{"name": "auto-empire-tycoon", "private": true, "version": "8.0.0", "scripts": {"test": "node tests/smoke.cjs", "build": "python3 tools/build.py"}, "devDependencies": {"playwright": "1.62.1"}}
+{"name": "auto-empire-tycoon", "private": true, "version": "8.0.0", "scripts": {"test": "node tests/smoke.cjs && node tests/polish.cjs", "build": "python3 tools/build.py"}, "devDependencies": {"playwright": "1.62.1"}}
