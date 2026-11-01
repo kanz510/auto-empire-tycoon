@@ -24,7 +24,7 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-      - name: RED: new visual regression must catch current bug
+      - name: "RED: new visual regression must catch current bug"
         run: |
           set +e
           node tests/visual-v11-2.cjs > /tmp/v11-2-red.log 2>&1
