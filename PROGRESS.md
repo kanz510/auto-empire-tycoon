@@ -39,3 +39,11 @@
 - Reduced pedestal/ring radius, grouped v9 fallback planters hidden on successful Kenney load, subtler grass, brighter/shapelier shrubs, 2.0-unit NPCs, thinner curved canopy.
 - Baseline material inventory, before/after screenshots (tiers 1–3 and demo crowd on both viewports), and Playwright regression under docs/screenshots and tests.
 - No changes to SP/slots, economics, gameplay, save key, or other UI. **Safari iPhone real-device testing has not been performed.**
+
+## V12 · Living City (2026-11-01)
+- New `src/city-v12.js` renders a separate decorative town around the dealership: behind-showroom avenue, pavements, road markings/crossings, a garden square and side street.
+- Imported nine local CC0 Kenney GLBs (commercial facades, suburban house, trees, road lights and traffic signals), with geometry/material cloning and visual fallback on failed downloads.
+- Two background cars move only as scenery, not added to gameplay traffic[] or save state. No changes to customer routes, money, inventory, save key aet6, UI or joystick controls.
+- `tests/living-city-v12.cjs` verifies 390×844 / 440×956, non-interactivity, no economic mutation and same-origin asset paths.
+- New hashed assets are precached by the existing PWA builder. Visual screenshots are stored in `docs/screenshots/`.
+- **Safari on a physical iPhone has not been tested**; user can verify the published main deployment.

@@ -26,7 +26,7 @@ assert.equal(result.used,true);assert.equal(result.orders,true);assert.equal(res
 await page.reload();await page.waitForFunction(()=>typeof S!=='undefined');assert.equal(await page.evaluate(()=>S.train),1);assert.equal(await page.evaluate(()=>S.xp),25.75);
 await page.evaluate(()=>{S.mi=MIS.length;$('modal').style.display='none'});await page.locator('[data-o="menu"]').tap();await page.locator('[data-a="ads"]').tap();await page.locator('[data-a="save"]').tap();
 await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);
-await context.setOffline(true);await page.reload();await page.waitForFunction(()=>typeof S!=='undefined');assert.match(await page.title(),/v11/);await context.setOffline(false);
+await context.setOffline(true);await page.reload();await page.waitForFunction(()=>typeof S!=='undefined');assert.match(await page.title(),/v12/);await context.setOffline(false);
 const second=await context.newPage();await second.goto(page.url());await second.waitForFunction(()=>typeof owner!=='undefined');assert.equal(await second.evaluate(()=>owner),false);await second.close();
 const soak=Math.max(0,Number(process.env.SOAK_SECONDS)||0);
 await page.waitForTimeout(soak*1000);

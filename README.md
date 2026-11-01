@@ -49,3 +49,6 @@ Five Kenney vehicle GLBs and four prop GLBs ship locally and are cache-versioned
 
 ## V11 Living Dealership
 Animated CC0 Mini Characters are loaded on demand from local, content-hashed GLB files and cloned with the vendored Three.js r128 SkeletonUtils. Use `?preview=1` to open the **TEST CẢNH** panel, cycle the three visual showroom tiers and display extra NPCs without modifying saved money, staff, progress or upgrades. `Cảnh thật` clears preview actors and restores the real level. The original procedural people remain as a graceful fallback if optional assets fail.
+
+## V12 Living City
+An entirely decorative urban neighborhood now surrounds the dealership: local CC0 Kenney commercial/suburban GLBs, boulevard, sidewalks, garden, street furniture, and two background traffic cars. No gameplay or save migration, and existing management-only controls remain unchanged. City assets are local/offline-cached and shared on model clones. See `docs/ASSET_LICENSES.md` and `docs/screenshots/v12-*.png` for sources and phone viewport screenshots.
