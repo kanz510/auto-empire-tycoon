@@ -6,7 +6,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fd4f0);scene.f
 scene.add(new THREE.HemisphereLight(0xdff1ff,0x6a8f5a,.7));
 const sun=new THREE.DirectionalLight(0xfff0d0,.85);sun.position.set(25,40,15);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,far:120});scene.add(sun);
 const fill=new THREE.DirectionalLight(0x9ec8ff,.25);fill.position.set(-20,15,-10);scene.add(fill);
-const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.4:1,T=new V(0,0,portraitFocus?7:2),TT=T.clone();
+const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.1:1,T=new V(portraitFocus?5.5:0,0,portraitFocus?1:2),TT=T.clone();
 function fit(){ren.setSize(innerWidth,innerHeight);const a=innerWidth/innerHeight,W=(a<1?36:54)/zoom,H=W/a;cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);
 const BOX_GEOMETRY={};
