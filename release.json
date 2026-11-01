@@ -1,1 +1,1 @@
-{"build": "bf6cb653ca55d4fc", "game": "./dist/game.f1d053913f7466d3.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"}
+{"build": "56bcb44886a1bea4", "game": "./dist/game.5d65695a2862aa33.js", "css": "./dist/game.c09f7a347ef3aae1.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"}
