@@ -3,7 +3,7 @@
   "private": true,
   "version": "9.0.0",
   "scripts": {
-    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs",
+    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs",
     "build": "python3 tools/build.py"
   },
   "devDependencies": {
