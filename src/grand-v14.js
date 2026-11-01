@@ -23,7 +23,7 @@ function gp(group,x,z,height=1.4){
  crown.scale.y=.87;
 }
 function tier(n){const g=new THREE.Group();g.name='grand-v14-tier-'+n;grandV14.tiers[n]=g;grandV14.root.add(g);return g}
-function sign(group,title,subtitle,width,x,y,z){
+function grandV14Sign(group,title,subtitle,width,x,y,z){
  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
  const c=canvas.getContext('2d');c.fillStyle='#122b3b';c.fillRect(0,0,1024,256);
  c.fillStyle='#d6b87d';c.fillRect(32,24,960,4);c.fillRect(32,224,960,4);
@@ -65,7 +65,7 @@ function sign(group,title,subtitle,width,x,y,z){
   gb(g,.13,.035,2.0,G.champagne,x,.17,5.05);
  }
  // Keep center of entrance readable, with a branded sign high above the cars.
- sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13,0,6.35,4.4);
+ grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13,0,6.35,4.4);
 }
 // Level 2: dedicated wing with visible roof, vertical louvers and
 // floor-to-ceiling glazing, without changing original interactive wing.
@@ -86,7 +86,7 @@ function sign(group,title,subtitle,width,x,y,z){
  }
  // External showroom terraces, architectural only.
  gb(g,13,.16,2.5,G.pavement,24.4,.13,7.3);
- sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.2,24.4,6.45,4.78);
+ grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.2,24.4,6.45,4.78);
 }
 // Level 3: flagship crown, skylight spine, rooftop green corners.
 // A perimeter canopy avoids an opaque roof over the camera-facing showroom.
