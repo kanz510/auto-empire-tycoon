@@ -6,7 +6,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fd4f0);scene.f
 scene.add(new THREE.HemisphereLight(0xdff1ff,0x6a8f5a,.7));
 const sun=new THREE.DirectionalLight(0xfff0d0,.85);sun.position.set(25,40,15);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,far:120});scene.add(sun);
 const fill=new THREE.DirectionalLight(0x9ec8ff,.25);fill.position.set(-20,15,-10);scene.add(fill);
-const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);let zoom=1,T=new V(0,0,2),TT=T.clone();
+const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,300);const portraitFocus=innerWidth<innerHeight;let zoom=portraitFocus?1.4:1,T=new V(0,0,portraitFocus?7:2),TT=T.clone();
 function fit(){ren.setSize(innerWidth,innerHeight);const a=innerWidth/innerHeight,W=(a<1?36:54)/zoom,H=W/a;cam.left=-W/2;cam.right=W/2;cam.top=H/2;cam.bottom=-H/2;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);
 const BOX_GEOMETRY={};
@@ -41,6 +41,30 @@ const oldVis=applyVis;applyVis=function(){oldVis();wing.visible=S.show>=2;wing.s
 key(sh,'show');
 const ctr=new THREE.Group();ctr.add(box(4,1.1,1,0x1565c0,12,.65,-1.6),box(4.2,.12,1.2,0xeeeeee,12,1.25,-1.6),box(.7,.5,.1,0x222222,12.5,1.6,-1.6));key(ctr,'staff');
 const trees=[];[[-20,-14],[20,-12],[-18,17],[22,18],[0,-16],[-8,-16],[9,-16]].forEach(p=>{const g=new THREE.Group();g.add(box(.4,1.4,.4,0x6d4c41,0,.7,0));const c=new THREE.Mesh(new THREE.ConeGeometry(1.5,3.5,7),M(0x2e8b57));c.position.y=3;c.castShadow=true;g.add(c);g.position.set(p[0],0,p[1]);scene.add(g);trees.push(g)});
+// Decorative campus outside customer routes. Static instances avoid per-object draw calls.
+const livingDistrict=new THREE.Group();livingDistrict.name='living-district';scene.add(livingDistrict);
+function districtInstances(geometry,material,points,shadow){
+ const mesh=new THREE.InstancedMesh(geometry,material,points.length),obj=new THREE.Object3D();
+ points.forEach((p,i)=>{obj.position.set(p[0],p[1],p[2]);obj.scale.set(p[3]||1,p[4]||1,p[5]||1);obj.rotation.y=(i%7)*.47;obj.updateMatrix();mesh.setMatrixAt(i,obj.matrix)});
+ mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!!shadow;mesh.receiveShadow=true;livingDistrict.add(mesh);return mesh;
+}
+const outerShrubs=[];
+for(let i=0;i<11;i++)outerShrubs.push([-15.8+i*3.15,.6,-12.65,.55,.8,.55]);
+for(let i=0;i<5;i++){outerShrubs.push([-16.8,.62,-9+i*2.5,.6,.9,.6]);outerShrubs.push([16.8,.62,-9+i*2.5,.6,.9,.6])}
+districtInstances(new THREE.ConeGeometry(.76,1.25,6),M(0x397e52,{roughness:1}),outerShrubs,true);
+const grassMarks=[];
+for(let i=0;i<72;i++){const x=-47+(i*31%95),z=-28+(i*43%63);
+ if(Math.abs(x)<31&&z>-16&&z<17)continue;
+ if(z>10&&z<17)continue;
+ grassMarks.push([x,.025,z,.8+(i%4)*.35,.7,1.2+(i%3)*.3]);
+}
+districtInstances(new THREE.CylinderGeometry(1,1,.045,6),M(0x81c985,{roughness:1}),grassMarks,false);
+const zebra=[];for(let i=0;i<8;i++)zebra.push([-31,.135,11.15+i*.45,.7,1,.52]);
+districtInstances(new THREE.BoxGeometry(.36,.025,.32),M(0xf4eee0,{roughness:1}),zebra,false);
+for(const x of [-12.5,12.5]){
+ livingDistrict.add(box(.12,3,.12,0x384c57,x,1.5,2.45),box(1.3,.72,.1,0xffca49,x,2.68,2.45,{metalness:.15,roughness:.6}));
+}
+
 const lamps=new THREE.Group();[[-14,10],[14,10],[0,10]].forEach(p=>lamps.add(box(.2,4,.2,0x444444,p[0],2,p[1]),box(.8,.3,.8,0xfff59d,p[0],4.1,p[1],{emissive:0xfff59d})));scene.add(lamps);
 const bb=new THREE.Group();bb.add(box(.3,5,.3,0x555555,-22,2.5,9),box(.3,5,.3,0x555555,-17,2.5,9),box(7,3,.3,0xe53935,-19.5,6,9,{emissive:0x551111}));scene.add(bb);
 const tdG=new THREE.Group();tdG.add(box(12,.1,16,0x3a3f47,22.5,.05,-2),box(5,.14,9,0x7cc36a,22.5,.06,-2),box(2.2,.1,1.4,0xffc107,17.5,.12,3.8),box(.3,3,.3,0x555555,16,1.5,5.5),box(3,1,.2,0xffc107,16,3.2,5.5,{emissive:0x553d00}));key(tdG,'show');
