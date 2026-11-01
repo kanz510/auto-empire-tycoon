@@ -1,18 +1,16 @@
-name: Apply and verify v11.1 fixes (one-time)
+name: V11.1 fix and verified release
 on:
   push:
     branches: [main]
 permissions:
   contents: write
 jobs:
-  fix:
+  apply:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -20,124 +18,38 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Prepare test and dependencies
-        shell: bash
+      - name: Install test dependencies
         run: |
-          cat > tests/fix-v11-1.cjs <<'TEST'
-          // V11.1 regressions: reset must survive pagehide, staff GLB taps resolve ancestors,
-          // and private orders must include every unlocked car type.
-          const {chromium}=require('playwright');
-          const assert=require('node:assert/strict');
-          const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
-          (async()=>{
-           const root=path.resolve(__dirname,'..');
-           const server=http.createServer((req,res)=>{
-             const p=new URL(req.url,'http://localhost').pathname;
-             if(p.includes('..') || !/^(\/|\/index.html|\/release.json|\/sw.js|\/manifest.webmanifest|\/assets\/[\w.-]+|\/dist\/[\w.-]+|\/vendor\/[\w.-]+)$/.test(p)){res.writeHead(404).end();return}
-             const file=path.join(root,p==='/'?'index.html':p.slice(1));
-             try{res.setHeader('Content-Type',p.endsWith('.js')?'application/javascript':p.endsWith('.glb')?'model/gltf-binary':p.endsWith('.css')?'text/css':p.endsWith('.png')?'image/png':'text/html');res.end(fs.readFileSync(file))}catch(e){res.writeHead(404).end()}
-           });
-           await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
-           try{
-             browser=await chromium.launch({headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader']});
-             const context=await browser.newContext({viewport:{width:440,height:956},isMobile:true,hasTouch:true,deviceScaleFactor:1});
-             const page=await context.newPage(),errors=[];
-             page.on('pageerror',err=>errors.push(err.message));
-             await page.addInitScript(()=>{Math.random=()=>0.99});
-             await page.goto('http://127.0.0.1:'+server.address().port+'/');
-             await page.waitForFunction(()=>typeof S!=='undefined'&&typeof orderCar==='function');
-             const orders=await page.evaluate(()=>{
-               S.show=3;S.auto=0;S.orders=[];let foundSport=false;
-               for(let i=0;i<100;i++){orderCar();if(S.orders[0]?.k==='sport')foundSport=true;S.orders=[]}
-               return {foundSport,unlocked:KS.filter(x=>CARS[x].lv<=S.show),show:S.show};
-             });
-             assert.equal(orders.foundSport,true,'Private order should include sport when showroom level 3 unlocks four cars: '+JSON.stringify(orders));
-             await page.waitForFunction(()=>CHARACTERS_V11.ready===4&&staff[0].m.userData.characterImported,{timeout:30000});
-             const tapResult=await page.evaluate(()=>{
-               const root=staff[0].m;let leaf;
-               root.userData.characterVisual.traverse(o=>{if(!leaf&&o.isMesh&&!o.userData.key)leaf=o});
-               if(!leaf)return {leaf:false,cur};
-               const original=ray.intersectObjects;
-               try{ray.intersectObjects=()=>[{object:leaf}];tap(120,240)}
-               finally{ray.intersectObjects=original}
-               return {leaf:true,cur,panel:P.textContent};
-             });
-             assert.equal(tapResult.leaf,true,'Need GLB child without a key');
-             assert.equal(tapResult.cur,'staff','Tapping GLB mesh must resolve parent staff key');
-             assert.match(tapResult.panel,/Nhân viên/,'Staff panel must not be blank/stale');
-             await page.evaluate(()=>{
-               S.money=123456;S.show=3;S.orders=[];save(true);window.confirm=()=>true;
-             });
-             assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('aet6')).money),123456);
-             await page.locator('[data-o="menu"]').tap();
-             await page.locator('[data-a="reset"]').tap();
-             await page.waitForFunction(()=>typeof S!=='undefined'&&S.money===5000&&S.show===1,{timeout:15000});
-             const reset=await page.evaluate(()=>({
-               money:S.money,show:S.show,
-               saved:JSON.parse(localStorage.getItem('aet6')||'null')?.money,
-               backup:JSON.parse(localStorage.getItem('aet6-backup')||'null')?.money
-             }));
-             assert.equal(reset.money,5000,'Reset must reload default $5000, not resurrect pagehide save');
-             assert.equal(reset.show,1);
-             assert.ok(reset.saved===undefined||reset.saved===5000,'aet6 must not contain pre-reset progress: '+JSON.stringify(reset));
-             assert.ok(reset.backup===undefined||reset.backup===5000,'backup must not resurrect pre-reset progress: '+JSON.stringify(reset));
-             assert.deepEqual(errors,[],'No JS runtime errors');
-             console.log('PASS v11.1: orderCar all unlocks, nested staff GLB tap, reset survives pagehide');
-           }finally{if(browser)await browser.close();await new Promise(r=>server.close(r))}
-          })().catch(e=>{console.error(e);process.exitCode=1});
-          
-          TEST
           npm install
           npx playwright install --with-deps chromium
-      - name: Red test: confirm existing orderCar regression
-        shell: bash
+      - name: Confirm red regression
         run: |
           set +e
-          node tests/fix-v11-1.cjs > /tmp/v11-red.log 2>&1
-          result=$?
+          node tests/fix-v11-1.cjs > /tmp/red.log 2>&1
+          code=$?
           set -e
-          cat /tmp/v11-red.log
-          if [ "$result" -eq 0 ] || ! grep -q 'Private order should include sport' /tmp/v11-red.log; then
-            echo 'RED regression was not reproduced as expected'
+          cat /tmp/red.log
+          if [ "$code" -eq 0 ] || ! grep -q "Private order should include sport" /tmp/red.log; then
+            echo "Expected RED assertion was not reproduced"
             exit 1
           fi
-          echo 'RED confirmed: sport unavailable to orderCar()'
-      - name: Patch only three bugs and progress
-        shell: bash
+      - name: Apply three targeted source fixes
         run: |
-          cat > /tmp/fix_v11_1.py <<'PY'
-          from pathlib import Path
-          r=Path('.')
-          def patch(file,old,new):
-           p=r/file
-           source=p.read_text()
-           if source.count(old)!=1:
-            raise SystemExit(f'Unexpected anchor in {file}: {source.count(old)}')
-           p.write_text(source.replace(old,new))
-          patch('src/save-state.js',"function save(f){if(!owner||!ownSave())return false;","let resetting=false;\nfunction save(f){if(resetting||!owner||!ownSave())return false;")
-          patch('src/ui.js',"if(d.a=='reset'&&confirm('Xóa toàn bộ tiến trình?')){try{","if(d.a=='reset'&&confirm('Xóa toàn bộ tiến trình?')){resetting=true;try{")
-          patch('src/graphics.js',"function tap(x,y){ray.setFromCamera({x:x/innerWidth*2-1,y:-(y/innerHeight)*2+1},cam);const h=ray.intersectObjects(hit,true);if(h.length){let k=h[0].object.userData.key;focus(k);openP(k=='park'?'show':k)}else closeP()}","function tap(x,y){ray.setFromCamera({x:x/innerWidth*2-1,y:-(y/innerHeight)*2+1},cam);const h=ray.intersectObjects(hit,true);let o=h[0]&&h[0].object,k;while(o&&!k){k=o.userData.key;o=o.parent}if(k){focus(k);openP(k=='park'?'show':k)}else closeP()}")
-          patch('src/save-state.js',"function orderCar(){if(S.orders.length>=3)return;const k=KS.filter(k=>CARS[k].lv<=S.show)[Math.floor(R()*S.show)%KS.filter(k=>CARS[k].lv<=S.show).length];S.orders.push({id:++S.orderId,k,elapsed:0});save();refreshP(1)}","function orderCar(){if(S.orders.length>=3)return;const un=KS.filter(x=>CARS[x].lv<=S.show),k=un[Math.floor(R()*un.length)];S.orders.push({id:++S.orderId,k,elapsed:0});save();refreshP(1)}")
-          with (r/'PROGRESS.md').open('a') as f:
-           f.write("\n## Fix v11.1 (2026-11-01)\n- Reset: chặn save() khi đang reset để pagehide không khôi phục tiến trình đã xóa; giữ nguyên save key aet6, aet6-backup, aet5, aet1.\n- Tương tác: tìm userData.key từ mesh GLB lên các node cha trước khi mở panel, tránh panel trống/cũ khi chạm nhân viên.\n- Đơn đặt xe: chọn ngẫu nhiên từ toàn bộ các loại xe đã mở khóa, gồm sport ở showroom cấp 3.\n- Bổ sung tests/fix-v11-1.cjs kiểm tra reset qua reload, chạm GLB, orderCar. Không thay gameplay khác, UI hay cơ chế offline.\n- Chưa kiểm thử trực tiếp trên Safari iPhone thật.\n")
-          
-          PY
-          python /tmp/fix_v11_1.py
-          node -e "let f=require('fs');let p='package.json';let j=JSON.parse(f.readFileSync(p));j.scripts.test+=' && node tests/fix-v11-1.cjs';f.writeFileSync(p,JSON.stringify(j,null,2)+'\n')"
-      - name: Build deterministic assets
+          python .github/scripts/apply-v11-1.py
+          node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.scripts.test+=' && node tests/fix-v11-1.cjs';fs.writeFileSync(p,JSON.stringify(j,null,2)+'\\n')"
+      - name: Rebuild v11.1 release
         run: npm run build
-      - name: Full browser suite
+      - name: Browser regression suite
         run: |
           npm install
           npx playwright install chromium
           npm test
-      - name: Commit source, tests, progress and generated release together
-        shell: bash
+      - name: Commit source and generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/save-state.js src/ui.js src/graphics.js tests/fix-v11-1.cjs package.json PROGRESS.md index.html release.json sw.js dist/
-          git diff --cached --name-only
           git diff --cached --check
-          git commit -m "fix(v11.1): reset, nested GLB staff taps, unlocked private order cars"
+          git diff --cached --name-only
+          git commit -m "fix(v11.1): reset, GLB staff tap and unlocked car orders"
           git push origin HEAD:main
