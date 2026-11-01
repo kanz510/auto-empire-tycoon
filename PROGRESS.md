@@ -64,3 +64,10 @@
 - Tier architecture is strictly decorative: no hit keys, changes to customer routes, slot positions, economy, save schema, staff, controls or UI. Existing V12 city remains.
 - `tests/grand-dealership-v13.cjs` checks all three tiers, economic state preservation and 390×844 / 440×956 screenshot capture.
 - Physical Safari iPhone has not been tested.
+
+## V14 Grand Showroom Rebuild (2026-11-02)
+- Expanded the visible dealership from a ~31-unit main facade to a 54-unit premium complex with side galleries, a 54-unit entrance plaza, perimeter canopy, glazing, and custom procedural CanvasTexture signs.
+- Tier 2 adds a wide 17-unit Premium Gallery frontage with bronze fins and glass. Tier 3 adds a flagship curved crown, roof planters and branded emblem.
+- Visual-only new root `grand-showroom-v14`, no interactive hit keys or extra gameplay slots. Existing showroom cars, AI routes, save key aet6, management mechanics and V12 city remain untouched.
+- Portrait framing updated for the new 54-unit facade and 10-unit flagship height at 390×844 and 440×956. Existing drag/pinch handlers remain unchanged.
+- Custom procedural signs are generated locally without remote image dependencies or third-party asset licensing. Real Safari iPhone testing still required.

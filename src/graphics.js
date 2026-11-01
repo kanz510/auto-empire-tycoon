@@ -83,16 +83,16 @@ function frameShowroomForLevel(){
  if(!portraitFocus||framedShowroomLevel===S.show)return;
  framedShowroomLevel=S.show;
  const gallery=S.show>=2;
- T.set(gallery?10.5:5.4,0,-1);TT.copy(T);
+ T.set(5.6,0,-1);TT.copy(T);
  zoom=1;fit();
  cam.position.copy(T).add(cameraOffset);cam.lookAt(T);cam.updateMatrixWorld(true);
  let maxX=0,maxY=0;
- const ends=gallery?[-15.8,27.4]:[-15.8,15.8];
- for(const xx of ends)for(const zz of [-11.7,3.8])for(const yy of [0,6.9]){
+ const ends=[-22.3,33.2];
+ for(const xx of ends)for(const zz of [-14.1,7.2])for(const yy of [0,10]){
   const p=new V(xx,yy,zz).project(cam);
   maxX=Math.max(maxX,Math.abs(p.x));maxY=Math.max(maxY,Math.abs(p.y));
  }
- zoom=Math.max(.60,Math.min(1.15,Math.min(.90/maxX,.74/maxY)));
+ zoom=Math.max(.43,Math.min(1.12,Math.min(.91/maxX,.74/maxY)));
  fit();
 }
 const ptr=new Map(),cvs=ren.domElement,ray=new THREE.Raycaster(),RT=new V(1,0,-1).normalize(),FW=new V(-1,0,-1).normalize();let down=null,pd=0;

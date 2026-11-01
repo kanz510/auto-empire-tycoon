@@ -18,7 +18,7 @@ function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTi
  warnT-=dt;slots.forEach((d,i)=>{if(i>=NSL())return;if(!d.car){d.t-=dt;if(d.t<=0){if(!restock(d)){d.t=2;if(warnT<=0&&STK()==0){warnT=40;toast('Kho hết xe, hãy nhập thêm ở mục Kho xe')}}}}else if(d.sc<1){d.sc=Math.min(1,d.sc+dt*1.2);d.mesh.scale.setScalar(d.sc)}});
  custs.forEach(c=>{if(c.per&&c.m===c.per)anim(c.per,c,tm)});staff.forEach(s=>anim(s.m,s,tm));
  PT.forEach(q=>{if(q.l>0){q.l-=dt;q.v.y-=12*dt;q.m.position.x+=q.v.x*dt;q.m.position.y+=q.v.y*dt;q.m.position.z+=q.v.z*dt;if(q.l<=0)q.m.visible=false}});
- traffic.forEach(o=>{o.m.position.x-=o.sp*dt;if(o.m.position.x<-45)o.m.position.x=45});clouds.forEach(c=>{c.position.x+=dt*.8;if(c.position.x>70)c.position.x=-70});trees.forEach((t,i)=>t.rotation.z=Math.sin(tm*.8+i)*.02);updateShowcase(dt);updateV11Preview(dt);updateV12City(dt);updateGrandDealershipV13(dt);
+ traffic.forEach(o=>{o.m.position.x-=o.sp*dt;if(o.m.position.x<-45)o.m.position.x=45});clouds.forEach(c=>{c.position.x+=dt*.8;if(c.position.x>70)c.position.x=-70});trees.forEach((t,i)=>t.rotation.z=Math.sin(tm*.8+i)*.02);updateShowcase(dt);updateV11Preview(dt);updateV12City(dt);updateGrandDealershipV13(dt);updateGrandShowroomV14(dt);
  hudT-=dt;if(hudT<=0){hudT=.4;hud()}
  }
 requestAnimationFrame(loop);
