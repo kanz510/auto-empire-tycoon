@@ -198,6 +198,60 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   assert.equal(v17Check.fwInView,true,'Fireworks must burst inside default camera frustum');
   assert.ok(v17Check.turboActive&&v17Check.expoActive&&v17Check.custCount>=1,'V17 Turbo Overdrive, Motor Show Expo & VIP Negotiation must function');
 
+  // Verify V17 UI Polish on 390x844 iPhone portrait viewport:
+  // 1) Dock icon & text optical alignment + horizontal centering (both idle & dynamic countdown labels)
+  // 2) Hologram badges float strictly above tall SUV roofs without depth clipping or helicopter overlap
+  await page.setViewportSize({width:390,height:844});
+  const v17MobileUI=await page.evaluate(()=>{
+   S.show=3;S.turbo=0;S.motorShow=0;
+   applyVis();
+   slots.forEach(d=>{if(d.mesh)scene.remove(d.mesh);mount(d,'suv',false);d.sc=1;d.mesh.scale.setScalar(1)});
+   updCam();cam.updateMatrixWorld(true);cam.updateProjectionMatrix();
+   updateMetropolisV17(.05);
+   const checkDockAlignment=()=>['v17-btn-turbo','v17-btn-expo','v17-btn-vip'].every(id=>{
+    const b=$(id),ico=b?.querySelector('.v17-fab-ico')?.getBoundingClientRect(),txt=b?.querySelector('.v17-fab-txt')?.getBoundingClientRect(),br=b?.getBoundingClientRect();
+    if(!ico||!txt||!br)return false;
+    const icoCy=ico.top+ico.height/2,txtCy=txt.top+txt.height/2,btnCy=br.top+br.height/2;
+    const leftPad=ico.left-br.left,rightPad=br.right-txt.right,gap=txt.left-ico.right;
+    return Math.abs(icoCy-txtCy)<=.5&&Math.abs(txtCy-btnCy)<=.5&&Math.abs(leftPad-rightPad)<=1.5&&Math.abs(gap-6)<=1.5;
+   });
+   const idleAligned=checkDockAlignment();
+   S.turbo=22;S.motorShow=41;
+   updateMetropolisV17(.05);
+   const dynamicAligned=checkDockAlignment();
+   const W=innerWidth,H=innerHeight;
+   const toScreen=v=>{const p=v.clone().project(cam);return {x:(p.x+1)*W/2,y:(1-p.y)*H/2}};
+   const ppu=W/(cam.right-cam.left);
+   const badgeHalfH=(metropolisV17.holoSprites[0].sprite.scale.y*ppu)/2;
+   const v=new THREE.Vector3();
+   const allBadgesAboveCars=slots.every((d,i)=>{
+    d.mesh.updateMatrixWorld(true);
+    let carTopY=1e9;
+    d.mesh.traverse(o=>{
+     if(!o.isMesh||!o.geometry?.attributes?.position)return;
+     const pos=o.geometry.attributes.position;
+     for(let j=0;j<pos.count;j++){
+      v.fromBufferAttribute(pos,j).applyMatrix4(o.matrixWorld);
+      carTopY=Math.min(carTopY,toScreen(v).y);
+     }
+    });
+    const b=metropolisV17.holoSprites[i];
+    const bs=toScreen(b.sprite.position);
+    const badgeBottomY=bs.y+badgeHalfH;
+    return b.sprite.material.depthTest===false&&badgeBottomY<carTopY&&bs.x>12&&bs.x<W-12;
+   });
+   const heliScreen=toScreen(metropolisV17.heli.position);
+   const heliClearOfBadges=metropolisV17.holoSprites.every(b=>{
+    const bs=toScreen(b.sprite.position);
+    return Math.hypot(bs.x-heliScreen.x,bs.y-heliScreen.y)>35;
+   });
+   return {idleAligned,dynamicAligned,allBadgesAboveCars,heliClearOfBadges};
+  });
+  assert.equal(v17MobileUI.idleAligned,true,'390px iPhone dock buttons must center icon+text and align vertical centers');
+  assert.equal(v17MobileUI.dynamicAligned,true,'390px iPhone dock buttons must remain aligned when countdown/deal labels update');
+  assert.equal(v17MobileUI.allBadgesAboveCars,true,'Hologram badges must float strictly above tall SUV roofs without depth clipping');
+  assert.equal(v17MobileUI.heliClearOfBadges,true,'Helicopter flight path must not overlap hologram badges');
+
   assert.deepEqual(errors,[]);
   console.log('PASS V16.1 + V17: Infinite Contracts, VIP Auctions, Prestige, Day/Night, Tuning, Stale Lock Recovery, WebGL Diagnostics & V17 Metropolis');
   await ctx.close();

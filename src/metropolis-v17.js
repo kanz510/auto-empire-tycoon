@@ -191,14 +191,15 @@ function makeBadgeSprite(w,h){
  canvas.width=w;canvas.height=h;
  const tex=new THREE.CanvasTexture(canvas);
  tex.encoding=THREE.sRGBEncoding;
- const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+ const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false});
  const sprite=new THREE.Sprite(mat);
+ sprite.renderOrder=15;
  return {sprite,canvas,ctx:canvas.getContext('2d'),tex,lastKey:''};
 }
 SP.forEach((p,i)=>{
  const b=makeBadgeSprite(256,96);
- b.sprite.position.set(p[0],2.55,p[1]);
- b.sprite.scale.set(3.2,1.2,1);
+ b.sprite.position.set(p[0],4.35,p[1]);
+ b.sprite.scale.set(2.25,.84,1);
  b.sprite.visible=false;
  metropolisV17.root.add(b.sprite);
  metropolisV17.holoSprites.push(b);
@@ -210,7 +211,19 @@ function updateHoloBadges(){
   if(!b)return;
   if(i>=NSL()||!d.car||!d.mesh){b.sprite.visible=false;return}
   b.sprite.visible=true;
-  b.sprite.position.y=2.45+Math.sin(metropolisV17.clock*2.2+i)*.08;
+  const baseH=d.car==='suv'?4.48:d.car==='sport'?3.98:4.22;
+  const rowOffsetY=i>=4?.36:0;
+  const ox=i>=4?-.15:(i===0||i===2?-.35:.48);
+  const oz=i>=4?-.25:(i===0||i===2?.25:-.12);
+  b.sprite.position.set(d.x+ox,baseH+rowOffsetY+Math.sin(metropolisV17.clock*2.2+i)*.05,d.z+oz);
+  if(typeof cam!=='undefined'){
+   const ndc=b.sprite.position.clone().project(cam);
+   if(ndc.x<-.84||ndc.x>.84||ndc.y<-.74||ndc.y>.78){
+    ndc.x=Math.max(-.84,Math.min(.84,ndc.x));
+    ndc.y=Math.max(-.74,Math.min(.78,ndc.y));
+    b.sprite.position.copy(ndc.unproject(cam));
+   }
+  }
   const stage=S.tuning?.[i]||0;
   const price=quote(d.car,{d,pref:'',vip:false});
   const key=`${d.car}:${stage}:${price}:${S.motorShow>0?1:0}`;
@@ -218,7 +231,7 @@ function updateHoloBadges(){
   b.lastKey=key;
   const c=b.ctx;
   c.clearRect(0,0,256,96);
-  c.fillStyle='rgba(12,28,46,0.88)';
+  c.fillStyle='rgba(12,28,46,0.92)';
   c.strokeStyle=stage>0?'#6be6ff':'#ffd54f';
   c.lineWidth=4;
   c.beginPath();c.roundRect?c.roundRect(6,6,244,84,18):c.rect(6,6,244,84);c.fill();c.stroke();
@@ -377,9 +390,9 @@ quote=function(k,c){
   dock.id='v17-dock';
   dock.setAttribute('aria-label','Tác vụ nhanh đại lý');
   dock.innerHTML=`
-   <button type="button" id="v17-btn-turbo" class="v17-fab" data-v17-dock="turbo">⚡ <span>Turbo</span></button>
-   <button type="button" id="v17-btn-expo" class="v17-fab" data-v17-dock="expo">🎪 <span>Triển lãm</span></button>
-   <button type="button" id="v17-btn-vip" class="v17-fab" data-v17-dock="vip">🤝 <span>Chốt VIP</span></button>
+   <button type="button" id="v17-btn-turbo" class="v17-fab" data-v17-dock="turbo"><span class="v17-fab-ico" aria-hidden="true">⚡</span> <span class="v17-fab-txt">Turbo</span></button>
+   <button type="button" id="v17-btn-expo" class="v17-fab" data-v17-dock="expo"><span class="v17-fab-ico" aria-hidden="true">🎪</span> <span class="v17-fab-txt">Triển lãm</span></button>
+   <button type="button" id="v17-btn-vip" class="v17-fab" data-v17-dock="vip"><span class="v17-fab-ico" aria-hidden="true">🤝</span> <span class="v17-fab-txt">Gọi khách</span></button>
   `;
   document.body.appendChild(dock);
   dock.addEventListener('click',e=>{
@@ -464,17 +477,17 @@ function updateMetropolisV17(dt){
   }
  }
 
- // Animate VIP Helicopter directly in the default camera view over the Showroom Forecourt (x: -7..+7, y: 4.8..6.2, z: -1..+3)
+ // Animate VIP Helicopter over the Front Boulevard Sky Corridor (in default camera view, completely clear of showroom cars & hologram badges)
  const showHeli=(typeof v11DemoTier==='number'?v11DemoTier:S.show)>=2||S.motorShow>0||S.lvl>=2;
  metropolisV17.heli.visible=true;
  metropolisV17.heliMainRotor.rotation.y+=step*24;
  metropolisV17.heliTailRotor.rotation.z+=step*28;
  {
   const ang=t*.65;
-  const hx=Math.sin(ang)*6.8;
-  const hz=1.0+Math.cos(ang*2)*1.8;
-  const hy=4.9+Math.sin(ang*1.5)*.55+(showHeli?0:.4);
-  const ry=Math.atan2(-Math.sin(ang*2)*3.6,Math.cos(ang)*6.8);
+  const hx=2.2+Math.sin(ang)*5.2;
+  const hz=14.6+Math.cos(ang*2)*1.2;
+  const hy=5.2+Math.sin(ang*1.5)*.35+(showHeli?0:.2);
+  const ry=Math.atan2(-Math.sin(ang*2)*2.4,Math.cos(ang)*5.2);
   metropolisV17.heli.position.set(hx,hy,hz);
   metropolisV17.heli.rotation.y=ry;
   if(metropolisV17.heliBeam){
@@ -511,22 +524,15 @@ function updateMetropolisV17(dt){
   if(r.life<=0)r.m.visible=false;
  });
 
- // Update Floating Quick-Action Dock labels
- const turboBtn=$('v17-btn-turbo'),expoBtn=$('v17-btn-expo'),vipBtn=$('v17-btn-vip');
- if(turboBtn){
-  const lbl=S.turbo>0?`⚡ ${Math.ceil(S.turbo)}s`:'⚡ Turbo';
-  if(turboBtn.textContent!==lbl)turboBtn.textContent=lbl;
-  turboBtn.classList.toggle('active',S.turbo>0);
- }
- if(expoBtn){
-  const lbl=S.motorShow>0?`🎪 ${Math.ceil(S.motorShow)}s`:'🎪 Triển lãm';
-  if(expoBtn.textContent!==lbl)expoBtn.textContent=lbl;
-  expoBtn.classList.toggle('active',S.motorShow>0);
- }
- if(vipBtn){
-  const waitCount=custs.filter(c=>!c.dead&&c.per&&(c.st==='WAITING'||c.st==='BROWSING')).length;
-  const lbl=waitCount>0?`🤝 Chốt (${waitCount})`:'🤝 Gọi khách';
-  if(vipBtn.textContent!==lbl)vipBtn.textContent=lbl;
-  vipBtn.classList.toggle('active',waitCount>0);
- }
+ // Update Floating Quick-Action Dock labels without destroying icon/text span alignment
+ const setDockBtn=(id,txt,active)=>{
+  const btn=$(id);if(!btn)return;
+  const span=btn.querySelector('.v17-fab-txt');
+  if(span&&span.textContent!==txt)span.textContent=txt;
+  btn.classList.toggle('active',!!active);
+ };
+ setDockBtn('v17-btn-turbo',S.turbo>0?`${Math.ceil(S.turbo)}s`:'Turbo',S.turbo>0);
+ setDockBtn('v17-btn-expo',S.motorShow>0?`${Math.ceil(S.motorShow)}s`:'Triển lãm',S.motorShow>0);
+ const waitCount=custs.filter(c=>!c.dead&&c.per&&(c.st==='WAITING'||c.st==='BROWSING')).length;
+ setDockBtn('v17-btn-vip',waitCount>0?`Chốt (${waitCount})`:'Gọi khách',waitCount>0);
 }
