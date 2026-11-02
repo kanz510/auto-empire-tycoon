@@ -95,7 +95,7 @@ function grandTier(level){
 }
 function updateGrandDealershipV13(dt){
  grandV13.clock+=Math.max(0,Math.min(.05,dt));
- const level=Math.max(1,Math.min(3,S.show|0));
+ const level=Math.max(1,Math.min(3,(typeof v11DemoTier==='number'?v11DemoTier:S.show)|0));
  if(grandV13.active!==level){
   grandV13.active=level;
   grandV13.tiers.forEach((g,i)=>{if(g)g.visible=i<=level});

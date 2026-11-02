@@ -9,7 +9,7 @@ let last=performance.now(),hudT=0,tm=0;
 function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const next=Math.max(1,Math.min(1.5,adaptiveDpr+(fps<38?-.15:fps>57?.05:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden||!owner)return;
  while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}
  updCam();ren.render(scene,cam)}
-function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;recordIncome('cars',800);toast('Đã bán xe cũ: lãi $800');save()}}
+function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;S.sold++;recordIncome('cars',800);addXP(10+2600/150);sales.push([performance.now(),800]);toast('Đã bán xe cũ: lãi $800');save()}}
  if(S.training>0){S.training=Math.max(0,S.training-dt);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false;toast('Đào tạo hoàn tất!');save()}}
  if(S.mkt>0)S.mkt=Math.max(0,S.mkt-dt);
  spawnT-=dt;if(spawnT<=0){spawn();spawnT=[20,16,13][S.park-1]*(.8+R()*.4)*(1-S.rep/400)*(S.mkt>0?.6:1)}

@@ -122,7 +122,7 @@ function applyVehicleAsset(root,k,col){
  body.material=paint;
  // Preserve the original v9 trim and sunroof, including their geometries.
  const details=root.getObjectByName('vehicle-detail-package');
- root.children.slice().forEach(child=>{if(child!==details)root.remove(child)});
+ root.children.slice().forEach(child=>{if(child!==details){if(child.isInstancedMesh)child.dispose();root.remove(child)}});
  root.add(copy);root.wheels=wheels;root.userData.paintHex=paintHex;
  root.userData.assetModel=true;root.userData.assetSource=ART[vehicleAssets[k]];
  return true;

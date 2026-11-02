@@ -35,6 +35,7 @@ function person(col,vip){const g=new THREE.Group(),ms=(geo,m,y)=>{const o=new TH
  g.legs=[-.12,.12].map(x=>lim(PG.l,M(0x37474f),x,.6,-.3));g.arms=[-.38,.38].map(x=>lim(PG.a,M(col),x,1.3,-.25));
  if(vip)ms(PG.c,M(0xffd54f,{emissive:0x7a5a00}),1.95);
  g.dot=ms(PG.d,new THREE.MeshBasicMaterial({color:0xffeb3b}),2.3);g.dot.visible=false;g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g}
-function removeActor(p){if(!p)return;scene.remove(p);if(p.dot&&!p.userData.disposed){p.dot.material.dispose();p.userData.disposed=true}}
+function disposeObject(root){if(!root||root.userData?.disposed)return;root.userData.disposed=true;const mixer=root.userData?.characterMixer;if(mixer){mixer.stopAllAction();if(root.userData.characterVisual)mixer.uncacheRoot(root.userData.characterVisual)}if(root.dot)root.dot.material.dispose();root.traverse(o=>{if(o.isInstancedMesh)o.dispose()})}
+function removeActor(p){if(!p)return;scene.remove(p);disposeObject(p)}
 function anim(p,o,t){if(!p||!p.legs)return;const mv=o.mv,sw=mv?Math.sin(t*9+(o.ph||0))*.6:0;p.legs[0].rotation.x=sw;p.legs[1].rotation.x=-sw;
  p.arms[0].rotation.x=o.act?-2+Math.sin(t*8)*.35:-sw*.8;p.arms[1].rotation.x=o.act?-1.2+Math.sin(t*8+1)*.3:sw*.8;p.position.y=mv?Math.abs(Math.sin(t*9))*.05:0}

@@ -117,11 +117,12 @@ function grandV14Sign(group,title,subtitle,width,x,y,z){
 }
 function updateGrandShowroomV14(dt){
  grandV14.clock+=Math.max(0,Math.min(.05,dt));
- const level=Math.max(1,Math.min(3,S.show|0));
+ const level=Math.max(1,Math.min(3,(typeof v11DemoTier==='number'?v11DemoTier:S.show)|0));
  if(grandV14.active!==level){
   grandV14.active=level;
   grandV14.tiers.forEach((g,i)=>{if(g)g.visible=i<=level});
  }
  if(grandV14.glow[0])grandV14.glow[0].rotation.y=Math.sin(grandV14.clock*.25)*.09;
 }
+if(typeof brand!=='undefined')brand.visible=false;if(typeof wingSign!=='undefined')wingSign.visible=false;if(typeof signFrame!=='undefined')signFrame.visible=false;if(typeof signText!=='undefined')signText.visible=false;
 updateGrandShowroomV14(0);

@@ -36,7 +36,8 @@ function person(col,vip){const g=new THREE.Group(),ms=(geo,m,y)=>{const o=new TH
  g.legs=[-.12,.12].map(x=>lim(PG.l,M(0x37474f),x,.6,-.3));g.arms=[-.38,.38].map(x=>lim(PG.a,M(col),x,1.3,-.25));
  if(vip)ms(PG.c,M(0xffd54f,{emissive:0x7a5a00}),1.95);
  g.dot=ms(PG.d,new THREE.MeshBasicMaterial({color:0xffeb3b}),2.3);g.dot.visible=false;g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g}
-function removeActor(p){if(!p)return;scene.remove(p);if(p.dot&&!p.userData.disposed){p.dot.material.dispose();p.userData.disposed=true}}
+function disposeObject(root){if(!root||root.userData?.disposed)return;root.userData.disposed=true;const mixer=root.userData?.characterMixer;if(mixer){mixer.stopAllAction();if(root.userData.characterVisual)mixer.uncacheRoot(root.userData.characterVisual)}if(root.dot)root.dot.material.dispose();root.traverse(o=>{if(o.isInstancedMesh)o.dispose()})}
+function removeActor(p){if(!p)return;scene.remove(p);disposeObject(p)}
 function anim(p,o,t){if(!p||!p.legs)return;const mv=o.mv,sw=mv?Math.sin(t*9+(o.ph||0))*.6:0;p.legs[0].rotation.x=sw;p.legs[1].rotation.x=-sw;
  p.arms[0].rotation.x=o.act?-2+Math.sin(t*8)*.35:-sw*.8;p.arms[1].rotation.x=o.act?-1.2+Math.sin(t*8+1)*.3:sw*.8;p.position.y=mv?Math.abs(Math.sin(t*9))*.05:0}
 // ---------- trạng thái & lưu
@@ -87,10 +88,10 @@ function recordExpense(cost){S.ops+=cost;const hour=Math.floor(Date.now()/360000
 function trainCost(){return Math.round(1200*Math.pow(1.65,S.train))}
 function startTraining(){if(S.training||S.train>=12||S.money<trainCost())return;const cost=trainCost();S.money-=cost;recordExpense(cost);S.training=30;S.trainingPending=true;save();refreshP(1)}
 function adjustPrice(k,step){if(!CARS[k])return;S.pricing[k]=Math.max(.85,Math.min(1.2,Math.round((S.pricing[k]+step)*100)/100));save();refreshP(1)}
-S.used=S.used||0;S.orders=Array.isArray(S.orders)?S.orders.filter(o=>o&&!o.done&&CARS[o.k]).slice(0,3):[];S.orderId=Number(S.orderId)||0;
+S.used=Math.max(0,Math.min(3,Math.floor(Number(S.used)||0)));S.usedTimer=Math.max(0,Math.min(40,Number(S.usedTimer)||0));S.orders=Array.isArray(S.orders)?S.orders.filter(o=>o&&!o.done&&CARS[o.k]).slice(0,3):[];S.orderId=Number(S.orderId)||0;
 function buyUsed(){const cost=1800;if(S.money<cost||S.used>=3)return;S.money-=cost;S.used++;save();refreshP(1)}
 function orderCar(){if(S.orders.length>=3)return;const un=KS.filter(x=>CARS[x].lv<=S.show),k=un[Math.floor(R()*un.length)];S.orders.push({id:++S.orderId,k,elapsed:0});save();refreshP(1)}
-function updateOrders(dt){for(const o of S.orders){o.elapsed+=dt;if(o.elapsed>=45&&S.inv[o.k]>0){S.inv[o.k]--;const income=Math.round(CARS[o.k].price*1.12),profit=income-S.basis[o.k];S.money+=income;S.profit+=profit;S.rev+=income;S.sold++;recordIncome('cars',profit);o.done=true;toast('Giao đơn đặt '+CARS[o.k].n+' · '+fm(income));save()}}S.orders=S.orders.filter(o=>!o.done)}
+function updateOrders(dt){for(const o of S.orders){o.elapsed+=dt;if(o.elapsed>=45&&S.inv[o.k]>0){S.inv[o.k]--;const income=Math.round(CARS[o.k].price*1.12),profit=income-S.basis[o.k];S.money+=income;S.profit+=profit;S.rev+=income;S.sold++;recordIncome('cars',profit);if(typeof addXP==='function')addXP(10+income/150);if(typeof sales!=='undefined')sales.push([performance.now(),profit]);o.done=true;toast('Giao đơn đặt '+CARS[o.k].n+' · '+fm(income));save()}}S.orders=S.orders.filter(o=>!o.done)}
 const fm=n=>'$'+Math.floor(n).toLocaleString('en-US'),need=l=>Math.round(120*Math.pow(l,1.5));
 let resetting=false;
 function save(f){if(resetting||!owner||!ownSave())return false;if(f||!document.hidden)S.t=Date.now();S.displayData=slots.map(d=>({basis:d.basis||0}));S.garEscrow=gj?gj.bc:0;S.disp=slots.map(d=>d.car?d.car+(d.cons?'*':''):'');try{const raw=JSON.stringify(S);localStorage.setItem('aet6',raw);localStorage.setItem('aet6-backup',raw);storageOK=true;return true}catch(e){storageOK=false;toast('Không lưu được: bộ nhớ trình duyệt bị chặn hoặc đầy')}}
@@ -179,16 +180,16 @@ function frameShowroomForLevel(){
  if(!portraitFocus||framedShowroomLevel===S.show)return;
  framedShowroomLevel=S.show;
  const gallery=S.show>=2;
- T.set(gallery?10.5:5.4,0,-1);TT.copy(T);
+ T.set(5.6,0,-1);TT.copy(T);
  zoom=1;fit();
  cam.position.copy(T).add(cameraOffset);cam.lookAt(T);cam.updateMatrixWorld(true);
  let maxX=0,maxY=0;
- const ends=gallery?[-15.8,27.4]:[-15.8,15.8];
- for(const xx of ends)for(const zz of [-11.7,3.8])for(const yy of [0,6.9]){
+ const ends=[-22.3,33.2];
+ for(const xx of ends)for(const zz of [-14.1,7.2])for(const yy of [0,10]){
   const p=new V(xx,yy,zz).project(cam);
   maxX=Math.max(maxX,Math.abs(p.x));maxY=Math.max(maxY,Math.abs(p.y));
  }
- zoom=Math.max(.60,Math.min(1.15,Math.min(.90/maxX,.74/maxY)));
+ zoom=Math.max(.43,Math.min(1.12,Math.min(.91/maxX,.74/maxY)));
  fit();
 }
 const ptr=new Map(),cvs=ren.domElement,ray=new THREE.Raycaster(),RT=new V(1,0,-1).normalize(),FW=new V(-1,0,-1).normalize();let down=null,pd=0;
@@ -450,7 +451,7 @@ function applyVehicleAsset(root,k,col){
  body.material=paint;
  // Preserve the original v9 trim and sunroof, including their geometries.
  const details=root.getObjectByName('vehicle-detail-package');
- root.children.slice().forEach(child=>{if(child!==details)root.remove(child)});
+ root.children.slice().forEach(child=>{if(child!==details){if(child.isInstancedMesh)child.dispose();root.remove(child)}});
  root.add(copy);root.wheels=wheels;root.userData.paintHex=paintHex;
  root.userData.assetModel=true;root.userData.assetSource=ART[vehicleAssets[k]];
  return true;
@@ -625,7 +626,7 @@ let v11DemoClock=0,v11DemoCrowd=[],v11DemoTier=null;
 function v11SetPreviewTier(level){
  v11DemoTier=level;
  showroomLevelTwo.visible=level>=2;
- showroomLevelThree.visible=level>=3;
+ showroomLevelThree.visible=level>=3;if(typeof u2!=='undefined')u2.visible=level>=2;if(typeof u3!=='undefined')u3.visible=level>=3;if(typeof wing!=='undefined')wing.visible=level>=2;if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);
  const status=document.getElementById('preview-status');
  if(status)status.textContent='Xem showroom cấp '+level+' · Không lưu';
 }
@@ -645,7 +646,7 @@ function v11PreviewCrowd(){
 function v11ClearPreview(){
  v11DemoCrowd.forEach(a=>{const mixer=a.m.userData.characterMixer;if(mixer){mixer.stopAllAction();mixer.uncacheRoot(a.m.userData.characterVisual)}});
  v11DemoRoot.clear();v11DemoCrowd=[];
- v11DemoTier=null;applyVis();
+ v11DemoTier=null;applyVis();if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);
  const status=document.getElementById('preview-status');
  if(status)status.textContent='Đã về cảnh thật · Tiến trình an toàn';
 }
@@ -931,7 +932,7 @@ function grandTier(level){
 }
 function updateGrandDealershipV13(dt){
  grandV13.clock+=Math.max(0,Math.min(.05,dt));
- const level=Math.max(1,Math.min(3,S.show|0));
+ const level=Math.max(1,Math.min(3,(typeof v11DemoTier==='number'?v11DemoTier:S.show)|0));
  if(grandV13.active!==level){
   grandV13.active=level;
   grandV13.tiers.forEach((g,i)=>{if(g)g.visible=i<=level});
@@ -942,6 +943,134 @@ function updateGrandDealershipV13(dt){
  }
 }
 updateGrandDealershipV13(0);
+// V14 Grand Showroom Rebuild. Larger visual footprint, unchanged playable slots.
+// All geometry stays outside raycast hit targets, AI routes and save state.
+const grandV14={root:new THREE.Group(),tiers:[],active:0,clock:0,glow:[],bounds:{minX:-21,maxX:32,minZ:-14,maxZ:7,maxY:10}};
+grandV14.root.name='grand-showroom-v14';scene.add(grandV14.root);
+const gmat=(color,metalness=.2,roughness=.42)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
+const G={
+ dark:gmat(0x172a37,.52,.3),navy:gmat(0x264756,.38,.37),
+ champagne:gmat(0xd9b77a,.72,.27),ivory:gmat(0xe9e6db,.16,.6),
+ stone:gmat(0xb6c5c7,.1,.67),pavement:gmat(0xa7b1ac,.08,.82),
+ foliage:gmat(0x397b64,.04,.93),glass:new THREE.MeshPhysicalMaterial({
+ color:0x9ad4e2,metalness:.05,roughness:.12,transparent:true,opacity:.22,depthWrite:false,side:THREE.DoubleSide
+ }),light:new THREE.MeshBasicMaterial({color:0xffe2a6}),water:gmat(0x60b6c5,.25,.22)
+};
+function gm(group,geo,mat,x,y,z){
+ const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.receiveShadow=true;
+ group.add(m);return m;
+}
+function gb(group,w,h,d,mat,x,y,z){return gm(group,new THREE.BoxGeometry(w,h,d),mat,x,y,z)}
+function gp(group,x,z,height=1.4){
+ gb(group,1.1,.52,1.1,G.dark,x,.32,z);
+ gm(group,new THREE.CylinderGeometry(.11,.15,height*.55,7),G.champagne,x,.64+height*.26,z);
+ const crown=gm(group,new THREE.IcosahedronGeometry(.75,1),G.foliage,x,.9+height*.7,z);
+ crown.scale.y=.87;
+}
+function tier(n){const g=new THREE.Group();g.name='grand-v14-tier-'+n;grandV14.tiers[n]=g;grandV14.root.add(g);return g}
+function grandV14Sign(group,title,subtitle,width,x,y,z){
+ const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=256;
+ const c=canvas.getContext('2d');c.fillStyle='#122b3b';c.fillRect(0,0,1024,256);
+ c.fillStyle='#d6b87d';c.fillRect(32,24,960,4);c.fillRect(32,224,960,4);
+ c.textAlign='center';c.fillStyle='#ffe4ad';c.font='bold 94px system-ui,sans-serif';
+ c.fillText(title,512,130,960);
+ c.fillStyle='#d6e9e9';c.font='500 34px system-ui,sans-serif';
+ c.fillText(subtitle,512,191,940);
+ const tex=new THREE.CanvasTexture(canvas);tex.encoding=THREE.sRGBEncoding;
+ const panel=gm(group,new THREE.PlaneGeometry(width,width/4),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}),x,y,z);
+ panel.name='grand-v14-brand-sign';return panel;
+}
+// Permanent expansion: true extra floor footprint, raised outer walls and
+// entrance plaza. Existing game floor and podiums remain at their exact coordinates.
+{
+ const g=tier(1);
+ // Two side galleries and rear apron make the dealership substantially wider.
+ gb(g,6.4,.32,17.5,G.ivory,-18.2,.17,-4.7);
+ gb(g,5.2,.32,17.5,G.ivory,17.4,.17,-4.7);
+ gb(g,6.2,.32,17.5,G.ivory,30,.17,-4.7); // visual gallery extension, no new slots
+ gb(g,54,.18,3.6,G.pavement,5.6,.07,5.1);
+ gb(g,52,.16,1.3,G.dark,5.6,.12,7.05);
+ gb(g,54,.25,.8,G.ivory,5.6,.15,-13.6);
+ for(const x of [-21.4,32.4]){
+  gb(g,.65,5.3,.7,G.navy,x,2.8,-4.7);
+  gb(g,.55,5.25,.55,G.champagne,x,2.8,3.3);
+ }
+ for(const x of [-19.6,-16.3,18.6,21.9,28.4,31]){
+  gb(g,.15,3.4,.15,G.navy,x,2.05,3.22);
+ }
+ for(const x of [-19.1,19.8,30]){
+  gb(g,2.8,3.5,.09,G.glass,x,2.02,3.18);
+ }
+ // Bigger facade silhouette with premium metal and bright trim, open to the cars.
+ gb(g,54,.55,2.4,G.dark,5.6,4.72,3.7);
+ gb(g,53.7,.095,.13,G.champagne,5.6,4.39,4.92);
+ gb(g,53.7,.08,.13,G.champagne,5.6,5.07,4.87);
+ for(const x of [-19,-13,13,19,27,31])gp(g,x,6.3,1.2);
+ for(const x of [-12,-8,-4,0,4,8,12,18,24,29]){
+  gb(g,.13,.035,2.0,G.champagne,x,.17,5.05);
+ }
+ // Keep center of entrance readable, with a branded sign high above the cars.
+ grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13,0,6.35,4.4);
+}
+// Level 2: dedicated wing with visible roof, vertical louvers and
+// floor-to-ceiling glazing, without changing original interactive wing.
+{
+ const g=tier(2);
+ gb(g,17,.28,19,G.ivory,24.4,.22,-4.7);
+ gb(g,17.7,.38,2.8,G.navy,24.4,5.3,3.85);
+ gb(g,17.5,.09,.13,G.champagne,24.4,5.07,5.18);
+ for(const x of [16.4,19.2,22,24.8,27.6,30.4,32.2]){
+  gb(g,.14,4.3,.18,G.champagne,x,2.65,3.56);
+ }
+ for(const x of [17.8,23.5,29.2]){
+  gb(g,5.3,3.5,.09,G.glass,x,2.53,3.5);
+ }
+ for(const x of [16.3,32.3]){
+  gp(g,x,6.15,1.6);
+  gb(g,.38,5.2,.38,G.navy,x,2.8,-13.2);
+ }
+ // External showroom terraces, architectural only.
+ gb(g,13,.16,2.5,G.pavement,24.4,.13,7.3);
+ grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.2,24.4,6.45,4.78);
+}
+// Level 3: flagship crown, skylight spine, rooftop green corners.
+// A perimeter canopy avoids an opaque roof over the camera-facing showroom.
+{
+ const g=tier(3);
+ gb(g,55,.32,2.2,G.dark,5.6,8.12,3.5);
+ gb(g,54.7,.12,.16,G.champagne,5.6,8.02,4.66);
+ gb(g,54.7,.09,.15,G.champagne,5.6,8.36,4.57);
+ for(const x of [-21.1,-15.4,-9.7,-4,1.7,7.4,13.1,18.8,24.5,30.2]){
+  gb(g,.16,2.45,.17,G.champagne,x,6.7,3.5);
+ }
+ for(const x of [-20.1,31.1]){
+  gb(g,3.6,.25,3.2,G.ivory,x,8.53,-10.2);
+  for(const dx of [-1,0,1]){
+   const bush=gm(g,new THREE.IcosahedronGeometry(.64,1),G.foliage,x+dx,9.15,-10.2);
+   bush.scale.y=.72;
+  }
+ }
+ const curve=new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-21.2,8.2,4.65),new THREE.Vector3(-11,9.0,5.1),
+  new THREE.Vector3(5.6,9.45,5.25),new THREE.Vector3(22,9.0,5.1),
+  new THREE.Vector3(32.4,8.2,4.65)
+ ]);
+ const arc=gm(g,new THREE.TubeGeometry(curve,48,.095,7,false),G.champagne,0,0,0);
+ arc.name='grand-v14-flagship-arch';
+ const emblem=gm(g,new THREE.TorusGeometry(.83,.12,9,32),G.champagne,5.6,9.65,4.65);
+ emblem.name='grand-v14-emblem';grandV14.glow.push(emblem);
+}
+function updateGrandShowroomV14(dt){
+ grandV14.clock+=Math.max(0,Math.min(.05,dt));
+ const level=Math.max(1,Math.min(3,(typeof v11DemoTier==='number'?v11DemoTier:S.show)|0));
+ if(grandV14.active!==level){
+  grandV14.active=level;
+  grandV14.tiers.forEach((g,i)=>{if(g)g.visible=i<=level});
+ }
+ if(grandV14.glow[0])grandV14.glow[0].rotation.y=Math.sin(grandV14.clock*.25)*.09;
+}
+if(typeof brand!=='undefined')brand.visible=false;if(typeof wingSign!=='undefined')wingSign.visible=false;if(typeof signFrame!=='undefined')signFrame.visible=false;if(typeof signText!=='undefined')signText.visible=false;
+updateGrandShowroomV14(0);
 // ---------- kinh tế
 const MAXL={show:3,park:3,spd:6,hire:3,td:3,gar:3},LVL=()=>({show:S.show,park:S.park,spd:S.spd,hire:S.staff,td:S.td,gar:S.gar});
 const COST={show:()=>[10000,30000][S.show-1],park:()=>[4500,15000][S.park-1],spd:()=>Math.round(2500*Math.pow(1.8,S.spd-1)),hire:()=>[6000,16000][S.staff-1],td:()=>[8000,20000,40000][S.td],gar:()=>[12000,25000,50000][S.gar]};
@@ -956,7 +1085,7 @@ function applyVis(){u2.visible=S.show>=2;u3.visible=S.show>=3;sign.material.colo
  pmark.forEach((m,i)=>{m[0].visible=m[1].visible=i<NPK()});lamps.visible=S.park>=2;tdG.visible=S.td>0;garG.visible=S.gar>0;ped.forEach((p,i)=>p.visible=i<NSL())}
 const sales=[];let t0=performance.now();
 function updRpm(){const n=performance.now(),w=Math.min(300000,n-t0);if(w<60000)return;while(sales.length&&n-sales[0][0]>300000)sales.shift();const s=sales.reduce((a,b)=>a+b[1],0);S.rpm=S.rpm*.8+s/(w/60000)*.2}
-function claimOffline(){const away=Math.max(0,(Date.now()-S.t)/1000);S.t=Date.now();S.training=Math.max(0,S.training-away);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false}if(!(away>60)||!(S.sold>0))return;const sec=Math.min(away,7200),g=Math.floor(Math.max(0,Math.min(S.rpm,150000))*sec/60*.5);S.t=Date.now();
+function claimOffline(){const away=Math.max(0,(Date.now()-S.t)/1000);S.t=Date.now();S.training=Math.max(0,S.training-away);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false}if(away>0&&S.orders.length)updateOrders(away);if(!(away>60)||!(S.sold>0))return;const sec=Math.min(away,7200),g=Math.floor(Math.max(0,Math.min(S.rpm,150000))*sec/60*.5);S.t=Date.now();
  if(g>0){S.money+=g;S.profit+=g;recordIncome('offline',g);popup('Chào mừng trở lại!','Vắng mặt '+Math.floor(sec/60)+' phút (tối đa 120).<br>Thu nhập offline (50% hiệu suất): <b>'+fm(g)+'</b>')}save(true)}
 // ---------- nhiệm vụ
 const MIS=[{t:'Bán 5 xe',k:'sold',n:5,r:1000},{t:'Nhập thêm 3 xe vào kho',k:'bought',n:3,r:800},{t:'Nâng Showroom lên cấp 2',k:'show',n:2,r:3000},{t:'Phục vụ 1 khách VIP',k:'vip',n:1,r:2500},{t:'Chạy quảng cáo 1 lần',k:'mktN',n:1,r:1500},{t:'Tuyển nhân viên thứ 2',k:'staff',n:2,r:3000},{t:'Đạt danh tiếng 50',k:'rep',n:50,r:5000},{t:'Bán 50 xe',k:'sold',n:50,r:10000},{t:'Xây khu lái thử',k:'td',n:1,r:4000},{t:'Xây khu sửa chữa',k:'gar',n:1,r:5000}];
@@ -985,10 +1114,10 @@ function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]);if(!free.
 const inPath=(c,d)=>{const wx=c.sx+1.6,p=[[wx,3.5],[0,3.5],[0,2.5],[0,0]];if(d){if(d.r2)p.push([0,-6]);p.push([d.ax,d.az])}return p};
 function outPath(c){const wx=c.sx+1.6,p=[];if(c.m.position.z<-5)p.push([0,-6]);p.push([0,.2],[0,2.5],[wx,3.5],[wx,7]);return p}
 function leave(c){if(c.d&&c.d.res===c)c.d.res=null;c.st='LEAVING';c.sub='';c.act=false;c.path=outPath(c);c.per.dot.visible=false}
-function forceLeave(c){if(c.st=='TESTDRIVE'&&(c.sub=='go'||c.sub=='drive')){tdBusy=Math.max(0,tdBusy-1);if(c.tdc){scene.remove(c.tdc);c.tdc=null;c.per.position.set(17.5,0,3.8);scene.add(c.per);c.m=c.per}}if(c.staff){c.staff.st='IDLE';c.staff.c=null;c.staff.path=[];c.staff=null}if(ctrC===c)ctrC=null;
- c.dr=0;if(c.per){c.m=c.per;leave(c);}else{if(c.d)c.d.res=null;c.dead=1;scene.remove(c.car);pk[c.pi]=0}}
+function forceLeave(c){if(c.st=='TESTDRIVE'&&(c.sub=='go'||c.sub=='drive')){tdBusy=Math.max(0,tdBusy-1);if(c.tdc){removeActor(c.tdc);c.tdc=null;c.per.position.set(17.5,0,3.8);scene.add(c.per);c.m=c.per}}if(c.staff){c.staff.st='IDLE';c.staff.c=null;c.staff.path=[];c.staff=null}if(ctrC===c)ctrC=null;
+ c.dr=0;if(c.per){c.m=c.per;leave(c);}else{if(c.d)c.d.res=null;c.dead=1;removeActor(c.car);pk[c.pi]=0}}
 function updC(c,dt){const kk=c.st+(c.sub||'');if(kk!==c.k){c.k=kk;c.age=0}else c.age+=dt;
- if((c.age>180&&c.st!='LEAVING')){forceLeave(c);return}if(c.st=='LEAVING'&&c.age>60){if(c.per)removeActor(c.per);scene.remove(c.car);pk[c.pi]=0;c.dead=1;return}
+ if((c.age>180&&c.st!='LEAVING')){forceLeave(c);return}if(c.st=='LEAVING'&&c.age>60){if(c.per)removeActor(c.per);removeActor(c.car);pk[c.pi]=0;c.dead=1;return}
  switch(c.st){
  case'SPAWNING':if(follow(c,9,dt,1)){c.st='PARKING';c.path=[[c.sx,7]]}break;
  case'PARKING':if(follow(c,5,dt,1)){const p=person(c.vip?0xffc107:PC[R()*6|0],c.vip);p.position.set(c.sx+1.6,0,7);scene.add(p);c.per=p;c.m=p;
@@ -996,18 +1125,18 @@ function updC(c,dt){const kk=c.st+(c.sub||'');if(kk!==c.k){c.k=kk;c.age=0}else c
  case'WALKING':if(follow(c,2.6,dt)){c.st='BROWSING';c.t=0}break;
  case'BROWSING':c.t+=dt;if(c.d)face(c.m,c.d.x,c.d.z);if(c.t>2.5){if(c.d){if(S.td>0&&tdBusy<S.td&&!c.tdDone&&R()<.5){c.tdDone=1;tdBusy++;c.st='TESTDRIVE';c.sub='go';c.path=[...(c.d.r2?[[0,-6]]:[]),[0,0],[0,2.5],[16,3.5],[17.5,3.8]]}else{c.st='WAITING';c.w=0;c.per.dot.visible=true;c.per.dot.material.color.set(0xffeb3b)}}else{addRep(-1);leave(c)}}break;
  case'TESTDRIVE':if(c.sub=='go'){if(follow(c,2.6,dt)){c.sub='drive';scene.remove(c.per);const m=makeCar(c.d.car,CARS[c.d.car].col);m.position.set(19,0,4);scene.add(m);c.tdc=m;c.m=m;c.path=[[26,4],[26,-8],[19,-8],[19,4]]}}
-  else if(c.sub=='drive'){if(follow(c,7,dt,1)){scene.remove(c.tdc);c.tdc=null;tdBusy=Math.max(0,tdBusy-1);c.m=c.per;c.per.position.set(17.5,0,3.8);scene.add(c.per);const fee=Math.round(150+CARS[c.d.car].price*.02);S.money+=fee;S.rev+=fee;S.profit+=fee;recordIncome('test',fee);S.tdN++;sales.push([performance.now(),fee]);floatTxt('+'+fm(fee),c.per.position);c.tdOK=1;c.sub='back';c.path=[[16,3.5],[0,2.5],[0,0],...(c.d.r2?[[0,-6]]:[]),[c.d.ax,c.d.az]]}}
+  else if(c.sub=='drive'){if(follow(c,7,dt,1)){removeActor(c.tdc);c.tdc=null;tdBusy=Math.max(0,tdBusy-1);c.m=c.per;c.per.position.set(17.5,0,3.8);scene.add(c.per);const fee=Math.round(150+CARS[c.d.car].price*.02);S.money+=fee;S.rev+=fee;S.profit+=fee;recordIncome('test',fee);S.tdN++;sales.push([performance.now(),fee]);floatTxt('+'+fm(fee),c.per.position);if(!c.tdOK){c.bud*=1.03;c.tdOK=1}c.sub='back';c.path=[[16,3.5],[0,2.5],[0,0],...(c.d.r2?[[0,-6]]:[]),[c.d.ax,c.d.az]]}}
   else if(follow(c,2.6,dt)){c.st='WAITING';c.w=0;c.sub='';c.per.dot.visible=true;c.per.dot.material.color.set(0xffeb3b)}break;
  case'WAITING':c.w+=dt;if(c.w>65){addRep(-2);S.satisfaction=S.satisfaction*.95+1.5;forceLeave(c)}break;
  case'BUYING':if(c.sub=='toC')follow(c,2.6,dt);c.act=c.sub=='serve'||c.sub=='pay';break;
- case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1)pk[c.pi]=0;if(follow(c,8,dt,1)){scene.remove(c.car);c.dead=1}}}}
+ case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1)pk[c.pi]=0;if(follow(c,8,dt,1)){removeActor(c.car);c.dead=1}}}}
 function ensureMech(){if(S.gar>0&&!mech){mech=person(0xff7043);mech.position.set(-20.6,0,-1.5);mech.rotation.y=-Math.PI/2;scene.add(mech)}}
 function updG(dt){if(S.gar<1)return;ensureMech();
  if(!gj){gT-=dt;if(gT<=0){const bc=Math.round(1200+R()*600);if(S.money>=bc){S.money-=bc;const m=makeCar(['hatch','sedan','suv'][R()*3|0],0x8d6e63);m.position.set(-36,0,12.5);scene.add(m);gj={m,st:'IN',path:[[-23,12.5],[-23,-1.5]],bc,t:0,age:0}}else gT=5}return}
- gj.age+=dt;if(gj.age>70){scene.remove(gj.m);S.money+=gj.bc;gj=null;gT=10;return}
+ gj.age+=dt;if(gj.age>70){removeActor(gj.m);S.money+=gj.bc;gj=null;gT=10;return}
  if(gj.st=='IN'){if(follow(gj,6,dt,1)){gj.st='FIX';gj.t=0}}
  else if(gj.st=='FIX'){gj.t+=dt*(1+.3*(S.gar-1));gj.m.position.y=Math.abs(Math.sin(tm*14))*.04;if(gj.t>=15){gj.m.position.y=0;gj.st='OUT';gj.path=[[-23,12.5],[42,12.5]]}}
- else if(follow(gj,6,dt,1)){const sp=Math.round(gj.bc+500+300*S.gar+R()*300),pf=sp-gj.bc;S.money+=sp;S.rev+=sp;S.profit+=pf;recordIncome('garage',pf);S.garN++;addXP(8+pf/100);addRep(.2);sales.push([performance.now(),pf]);floatTxt('+'+fm(sp),gj.m.position);scene.remove(gj.m);gj=null;gT=Math.max(8,22-4*S.gar)}}
+ else if(follow(gj,6,dt,1)){const sp=Math.round(gj.bc+500+300*S.gar+R()*300),pf=sp-gj.bc;S.money+=sp;S.rev+=sp;S.profit+=pf;recordIncome('garage',pf);S.garN++;addXP(8+pf/100);addRep(.2);sales.push([performance.now(),pf]);floatTxt('+'+fm(sp),gj.m.position);removeActor(gj.m);gj=null;gT=Math.max(8,22-4*S.gar)}}
 function addStaff(i){const m=person(0x1976d2);const home=[-8+i*2.4,-.8];m.position.set(home[0],0,home[1]);scene.add(m);m.add(box(.1,.5,.05,0xffffff,0,1.05,.3));staff.push({m,st:'IDLE',path:[],home,i,age:0,ph:i});key(m,'staff')}
 function route(s,tz){const p=[];if(s.m.position.z<-6)p.push([0,-6],[0,-.8]);if(tz<-6)p.push([0,-.8],[0,-6]);return p}
 function updS(s,dt){s.act=s.st=='SERVING';if(s.st!==s.k){s.k=s.st;s.age=0}else s.age+=dt;
@@ -1028,7 +1157,7 @@ function reserveCar(c){
 function sale(c,s){const d=c.d;if(!d||!d.car){forceLeave(c);return}if(quote(d.car,c)>c.bud&&quote(d.car,c)*.95<=c.bud){c.offer=Math.floor(c.bud/(c.tdOK?1.03:1));toast('Nhân viên thương lượng thành công')}if(quote(d.car,c)>c.bud){addRep(-.5);S.satisfaction=S.satisfaction*.95+2;forceLeave(c);return}const k=CARS[d.car],price=quote(d.car,c),prof=price-(d.basis||k.cost),inc=d.cons?prof:price;
  S.money+=inc;S.rev+=price;S.profit+=prof;S.sold++;recordIncome('cars',prof);S.satisfaction=S.satisfaction*.95+Math.max(35,100-c.w*.8)*.05;if(c.vip)S.vip++;addRep(c.vip?2:.5);addXP(10+price/150);sales.push([performance.now(),prof]);
  floatTxt('+'+fm(inc),c.m.position);burst(c.m.position);beep(880,.12);setTimeout(()=>beep(1320,.18),100);
- scene.remove(d.mesh);d.car=null;d.mesh=null;d.res=null;d.t=3.5;ctrC=null;c.staff=null;leave(c);s.st='FINISHING';s.fin='idle';s.t=.4;save()}
+ removeActor(d.mesh);d.car=null;d.mesh=null;d.res=null;d.t=3.5;ctrC=null;c.staff=null;leave(c);s.st='FINISHING';s.fin='idle';s.t=.4;save()}
 function floatTxt(txt,pos){const v=new V(pos.x,2.5,pos.z).project(cam),e=document.createElement('div');e.className='x';e.textContent=txt;e.style.left=(v.x+1)/2*innerWidth+'px';e.style.top=(1-v.y)/2*innerHeight+'px';document.body.appendChild(e);setTimeout(()=>e.remove(),1500)}
 // ---------- giao diện
 let cur=null;const P=$('P');
@@ -1084,7 +1213,7 @@ let last=performance.now(),hudT=0,tm=0;
 function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const next=Math.max(1,Math.min(1.5,adaptiveDpr+(fps<38?-.15:fps>57?.05:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden||!owner)return;
  while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}
  updCam();ren.render(scene,cam)}
-function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;recordIncome('cars',800);toast('Đã bán xe cũ: lãi $800');save()}}
+function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;S.sold++;recordIncome('cars',800);addXP(10+2600/150);sales.push([performance.now(),800]);toast('Đã bán xe cũ: lãi $800');save()}}
  if(S.training>0){S.training=Math.max(0,S.training-dt);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false;toast('Đào tạo hoàn tất!');save()}}
  if(S.mkt>0)S.mkt=Math.max(0,S.mkt-dt);
  spawnT-=dt;if(spawnT<=0){spawn();spawnT=[20,16,13][S.park-1]*(.8+R()*.4)*(1-S.rep/400)*(S.mkt>0?.6:1)}
@@ -1093,7 +1222,7 @@ function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTi
  warnT-=dt;slots.forEach((d,i)=>{if(i>=NSL())return;if(!d.car){d.t-=dt;if(d.t<=0){if(!restock(d)){d.t=2;if(warnT<=0&&STK()==0){warnT=40;toast('Kho hết xe, hãy nhập thêm ở mục Kho xe')}}}}else if(d.sc<1){d.sc=Math.min(1,d.sc+dt*1.2);d.mesh.scale.setScalar(d.sc)}});
  custs.forEach(c=>{if(c.per&&c.m===c.per)anim(c.per,c,tm)});staff.forEach(s=>anim(s.m,s,tm));
  PT.forEach(q=>{if(q.l>0){q.l-=dt;q.v.y-=12*dt;q.m.position.x+=q.v.x*dt;q.m.position.y+=q.v.y*dt;q.m.position.z+=q.v.z*dt;if(q.l<=0)q.m.visible=false}});
- traffic.forEach(o=>{o.m.position.x-=o.sp*dt;if(o.m.position.x<-45)o.m.position.x=45});clouds.forEach(c=>{c.position.x+=dt*.8;if(c.position.x>70)c.position.x=-70});trees.forEach((t,i)=>t.rotation.z=Math.sin(tm*.8+i)*.02);updateShowcase(dt);updateV11Preview(dt);updateV12City(dt);updateGrandDealershipV13(dt);
+ traffic.forEach(o=>{o.m.position.x-=o.sp*dt;if(o.m.position.x<-45)o.m.position.x=45});clouds.forEach(c=>{c.position.x+=dt*.8;if(c.position.x>70)c.position.x=-70});trees.forEach((t,i)=>t.rotation.z=Math.sin(tm*.8+i)*.02);updateShowcase(dt);updateV11Preview(dt);updateV12City(dt);updateGrandDealershipV13(dt);updateGrandShowroomV14(dt);
  hudT-=dt;if(hudT<=0){hudT=.4;hud()}
  }
 requestAnimationFrame(loop);
