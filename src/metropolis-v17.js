@@ -1,11 +1,11 @@
 // V17 Grand Metropolis & Showroom Life:
-// 1. Living 3D World: Animated VIP Helicopter landing on rooftop helipad, LED Boulevard Archway,
-//    3D Floating Hologram Price Signs above cars, Customer Emotion Bubbles & Night Headlight Beams.
+// 1. Living 3D World: Animated VIP Helicopter flying in the default camera view over the Showroom Forecourt,
+//    Front Plaza Sky Spotlights, 3D Floating Hologram Price Signs above cars & Customer Emotion Bubbles.
 // 2. Premium UI & Quick-Action Dock: On-screen quick buttons (Turbo Boost, Motor Show, Instant VIP Deal)
 //    & Vehicle Spec Bars in Inventory.
 // 3. Active Gameplay Events: Motor Show Expo (+15% price & 2.2x traffic + Sky Spotlights),
-//    Turbo Overdrive (2x staff/test-drive/garage speed), and Direct VIP Deal Negotiation.
-// 4. Polyphonic WebAudio & 3D Fireworks: Engine revving, Ka-ching cash register chords & 3D multi-color fireworks.
+//    Turbo Overdrive (exact 2x staff/test-drive/garage speed), and Direct VIP Deal Negotiation.
+// 4. Polyphonic WebAudio & 6s Multi-Wave 3D Fireworks connected to all vehicle sales.
 
 const CAR_SPECS={
  hatch:{tag:'Đô thị Tiết kiệm',spd:58,lux:52,rare:40,icon:'🚗'},
@@ -65,25 +65,31 @@ const metropolisV17={
  heli:new THREE.Group(),
  heliMainRotor:null,
  heliTailRotor:null,
+ heliBeam:null,
  spotlights:new THREE.Group(),
  spotBeams:[],
  holoSprites:[],
  custBubbles:[],
- headlights:[],
  fireworks:[],
+ fireworkRings:[],
+ fireworkTimer:0,
+ nextWaveAt:0,
+ fireOriginX:0,
+ fireOriginZ:0,
+ lastSold:S.sold,
  clock:0
 };
 metropolisV17.root.name='grand-metropolis-v17';
 metropolisV17.root.add(metropolisV17.heli,metropolisV17.spotlights);
 scene.add(metropolisV17.root);
 
-// 2A. Build 3D VIP Executive Helicopter
+// 2A. Build 3D VIP Executive Helicopter (positioned right in the default camera view over the Showroom Forecourt)
 {
  const bodyMat=new THREE.MeshStandardMaterial({color:0x142636,metalness:.75,roughness:.2});
  bodyMat.color.convertSRGBToLinear();
  const goldMat=new THREE.MeshStandardMaterial({color:0xffd54f,metalness:.85,roughness:.18});
  goldMat.color.convertSRGBToLinear();
- const glassMat=new THREE.MeshPhysicalMaterial({color:0x7fd8ff,metalness:.1,roughness:.08,transparent:true,opacity:.58});
+ const glassMat=new THREE.MeshPhysicalMaterial({color:0x7fd8ff,metalness:.1,roughness:.08,transparent:true,opacity:.65});
  glassMat.color.convertSRGBToLinear();
  const rotorMat=new THREE.MeshStandardMaterial({color:0x263238,metalness:.6,roughness:.3});
 
@@ -91,11 +97,11 @@ scene.add(metropolisV17.root);
  cabin.scale.set(1.55,.88,.95);cabin.position.set(0,.78,0);cabin.castShadow=true;
  const nose=new THREE.Mesh(new THREE.SphereGeometry(.82,14,10),glassMat);
  nose.scale.set(1.35,.76,.88);nose.position.set(.52,.82,0);
- const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.4,.12,1.92),goldMat);
+ const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.4,.14,1.94),goldMat);
  stripe.position.set(-.05,.75,0);
  const boom=new THREE.Mesh(new THREE.CylinderGeometry(.12,.26,2.8,10),bodyMat);
  boom.rotation.z=Math.PI/2;boom.position.set(-2.1,.92,0);boom.castShadow=true;
- const fin=new THREE.Mesh(new THREE.BoxGeometry(.55,.85,.1),goldMat);
+ const fin=new THREE.Mesh(new THREE.BoxGeometry(.55,.85,.12),goldMat);
  fin.position.set(-3.35,1.22,0);
  metropolisV17.heli.add(cabin,nose,stripe,boom,fin);
 
@@ -112,18 +118,27 @@ scene.add(metropolisV17.root);
  const mast=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.36,8),goldMat);
  mast.position.set(0,1.62,0);
  const mainRotor=new THREE.Group();mainRotor.position.set(0,1.78,0);
- const b1=new THREE.Mesh(new THREE.BoxGeometry(4.6,.03,.22),rotorMat);
- const b2=new THREE.Mesh(new THREE.BoxGeometry(.22,.03,4.6),rotorMat);
+ const b1=new THREE.Mesh(new THREE.BoxGeometry(4.8,.035,.26),rotorMat);
+ const b2=new THREE.Mesh(new THREE.BoxGeometry(.26,.035,4.8),rotorMat);
  mainRotor.add(b1,b2);
- const tailRotor=new THREE.Mesh(new THREE.BoxGeometry(.04,.85,.12),rotorMat);
+ const tailRotor=new THREE.Mesh(new THREE.BoxGeometry(.04,.9,.14),rotorMat);
  tailRotor.position.set(-3.45,1.22,.12);
- metropolisV17.heli.add(mast,mainRotor,tailRotor);
+
+ // Downward VIP Searchlight Cone under the Helicopter so it stands out in any lighting
+ const heliBeam=new THREE.Mesh(
+  new THREE.ConeGeometry(1.55,4.8,16,1,true),
+  new THREE.MeshBasicMaterial({color:0xffe57f,transparent:true,opacity:.38,side:THREE.DoubleSide,depthWrite:false})
+ );
+ heliBeam.position.set(0,-2.35,0);
+ metropolisV17.heli.add(mast,mainRotor,tailRotor,heliBeam);
  metropolisV17.heliMainRotor=mainRotor;
  metropolisV17.heliTailRotor=tailRotor;
- metropolisV17.heli.position.set(29.2,5.72,-9.2);
+ metropolisV17.heliBeam=heliBeam;
+ metropolisV17.heli.scale.setScalar(1.32);
+ metropolisV17.heli.position.set(0,5.2,1.2);
 }
 
-// 2B. VIP Red Carpet Entrance Runner, Glass Bollards & Motor Show Sky Spotlights
+// 2B. VIP Red Carpet Entrance Runner, Glass Bollards & Front-Plaza Motor Show Spotlights
 {
  const carpetMat=new THREE.MeshStandardMaterial({color:0xb71c1c,roughness:.75,metalness:.08});
  carpetMat.color.convertSRGBToLinear();
@@ -146,14 +161,26 @@ scene.add(metropolisV17.root);
   metropolisV17.root.add(p,c);
  }
 
- // Motor Show Sky Spotlight Cones on roof
- const beamGeo=new THREE.ConeGeometry(1.8,14,16,1,true);
- [[-12,0x6be6ff],[0,0xffdf80],[12,0xff77a9],[24,0x7cffcb]].forEach(([x,col])=>{
-  const mat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.22,side:THREE.DoubleSide,depthWrite:false});
-  const cone=new THREE.Mesh(beamGeo,mat);
-  cone.position.set(x,11.5,-10.2);
-  metropolisV17.spotlights.add(cone);
-  metropolisV17.spotBeams.push(cone);
+ // 4 High-Visibility Motor Show Spotlights on the Front Showroom Plaza (z = 2.8, right in default camera view!)
+ const outerGeo=new THREE.ConeGeometry(1.55,8.6,18,1,true);
+ const innerGeo=new THREE.ConeGeometry(.72,8.2,14,1,true);
+ const ringGeo=new THREE.TorusGeometry(1.05,.065,8,28);
+ const baseGeo=new THREE.CylinderGeometry(.38,.48,.22,14);
+ [[-8.5,0x00e5ff],[-2.8,0xffd54f],[2.8,0xff4081],[8.5,0x69f0ae]].forEach(([x,col])=>{
+  const pivot=new THREE.Group();
+  pivot.position.set(x,.22,2.8);
+  const base=new THREE.Mesh(baseGeo,trimMat);
+  const floorRing=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:col}));
+  floorRing.rotation.x=Math.PI/2;floorRing.position.y=.05;
+  const outerMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.44,side:THREE.DoubleSide,depthWrite:false});
+  const innerMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.72,side:THREE.DoubleSide,depthWrite:false});
+  const outerCone=new THREE.Mesh(outerGeo,outerMat);
+  outerCone.position.y=4.3;
+  const innerCone=new THREE.Mesh(innerGeo,innerMat);
+  innerCone.position.y=4.1;
+  pivot.add(base,floorRing,outerCone,innerCone);
+  metropolisV17.spotlights.add(pivot);
+  metropolisV17.spotBeams.push(pivot);
  });
  metropolisV17.spotlights.visible=false;
 }
@@ -233,36 +260,59 @@ function updateCustomerBubbles(){
  });
 }
 
-// 2E. 3D Multi-Color Fireworks System
+// 2E. 3D Multi-Wave Fireworks & Shockwave Rings (6.0 seconds duration, centered in default camera view)
 {
- const fwGeo=new THREE.SphereGeometry(.16,8,6);
- const cols=[0xffd54f,0x6be6ff,0xff6e7f,0x9cff9c,0xe040fb];
- for(let i=0;i<36;i++){
+ const fwGeo=new THREE.SphereGeometry(.32,8,6);
+ const cols=[0xffd54f,0x00e5ff,0xff4081,0x69f0ae,0xe040fb,0xffffff];
+ for(let i=0;i<48;i++){
   const m=new THREE.Mesh(fwGeo,new THREE.MeshBasicMaterial({color:cols[i%cols.length]}));
   m.visible=false;
   metropolisV17.root.add(m);
   metropolisV17.fireworks.push({m,v:new V(),life:0});
  }
+ const ringGeo=new THREE.TorusGeometry(1.2,.09,8,32);
+ for(let i=0;i<3;i++){
+  const r=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:cols[i]}));
+  r.rotation.x=Math.PI/2;
+  r.visible=false;
+  metropolisV17.root.add(r);
+  metropolisV17.fireworkRings.push({m:r,life:0,scale:1});
+ }
 }
-function launchFireworks(originX=0,originZ=-4){
+function spawnFireworkWave(cx=0,cz=1){
  metropolisV17.fireworks.forEach((f,i)=>{
-  f.life=1.4+R()*.5;
+  f.life=2.2+R()*.8;
   f.m.visible=true;
-  f.m.position.set(originX+(R()-.5)*4,3.5+R()*2,originZ+(R()-.5)*3);
-  const a=(i/36)*Math.PI*2+R()*.3,sp=4+R()*5;
-  f.v.set(Math.cos(a)*sp,6+R()*6,Math.sin(a)*sp);
+  const clusterX=cx+((i%3)-1)*3.2;
+  f.m.position.set(clusterX+(R()-.5)*1.5,3.2+R()*2.2,cz+(R()-.5)*2);
+  const a=(i/16)*Math.PI*2+R()*.25,sp=3.5+R()*4.5;
+  f.v.set(Math.cos(a)*sp,5.5+R()*4.5,Math.sin(a)*sp);
+ });
+ metropolisV17.fireworkRings.forEach((r,i)=>{
+  r.life=1.8;r.scale=.6+i*.35;
+  r.m.visible=true;
+  r.m.position.set(cx+(i-1)*3.2,4.2+i*.5,cz);
+  r.m.scale.setScalar(r.scale);
  });
 }
+function launchFireworks(originX=0,originZ=1){
+ // Clamp firework center into the visible default camera viewport (-5..+5, -1..+3)
+ metropolisV17.fireOriginX=Math.max(-5,Math.min(5,Number(originX)||0));
+ metropolisV17.fireOriginZ=Math.max(-1.5,Math.min(3,Number(originZ)||1));
+ metropolisV17.fireworkTimer=6.0;
+ metropolisV17.nextWaveAt=5.0;
+ spawnFireworkWave(metropolisV17.fireOriginX,metropolisV17.fireOriginZ);
+}
 
-// Hook burst() so every vehicle sale triggers rich 3D fireworks & cash register sound
+// Hook burst() AND watch S.sold so every single vehicle sale triggers 6-second 3D fireworks & cash chime
 const baseBurstV17=burst;
 burst=function(p){
  baseBurstV17(p);
- launchFireworks(p?.x||0,p?.z||-4);
+ launchFireworks(p?.x||0,p?.z||1);
  sfx('cash');
 };
 
-// 3. Active Gameplay: Turbo Boost, Motor Show Expo & Direct VIP Deal Negotiation
+// 3. Active Gameplay: Turbo Boost (exact 2x), Motor Show Expo & Direct VIP Deal Negotiation
 function activateTurbo(){
  if(S.turbo>5){toast('⚡ Turbo đang hoạt động ('+Math.ceil(S.turbo)+'s)');return}
  const cost=S.lvl>=3?1200:0;
@@ -282,9 +332,10 @@ function startMotorShow(){
  S.motorShow=45;
  S.showsHosted=(S.showsHosted||0)+1;
  addRep(3);addXP(65);
- launchFireworks(0,-5);
+ launchFireworks(0,1.2);
  sfx('fanfare');
  toast('🎪 KHAI MẠC MOTOR SHOW: Giá xe +15% & Khách VIP ×2.2!');
+ if(typeof closeP==='function'&&cur==='show')closeP();
  save();refreshP(1);
 }
 
@@ -308,7 +359,6 @@ function negotiateVIP(){
   floatTxt('🤝 Chốt VIP +'+fm(bonus),target.per.position);
   sfx('cash');
  }
- // Speed up consultation if customer is already being served
  if(target.st==='BUYING'&&typeof target.prog==='number')target.prog+=2.5;
  save();refreshP(1);
 }
@@ -349,7 +399,7 @@ ph=function(k){
  let h=basePhV17(k);
  if(k==='show'){
   h+=`<div class="v16-card v17-card"><div><b>🎪 Sự Kiện & Tăng Tốc Đại Lý (V17)</b> <span class="v16-tag">Đã mở ${S.showsHosted} triển lãm</span></div>`+
-   `<div class="r"><div><b>⚡ Chế độ Turbo Overdrive</b><br>Tăng ×1.8 tốc độ nhân viên, Lái thử & Gara trong 25s.<br>${S.turbo>0?`<b style="color:#8bf28b">Đang bật: còn ${Math.ceil(S.turbo)}s</b>`:'Sẵn sàng kích hoạt'}</div><button data-v17="turbo">${S.turbo>0?Math.ceil(S.turbo)+'s':(S.lvl>=3?fm(1200):'Miễn phí')}</button></div>`+
+   `<div class="r"><div><b>⚡ Chế độ Turbo Overdrive</b><br>Tăng ×2 tốc độ nhân viên, Lái thử & Gara trong 25s.<br>${S.turbo>0?`<b style="color:#8bf28b">Đang bật: còn ${Math.ceil(S.turbo)}s</b>`:'Sẵn sàng kích hoạt'}</div><button data-v17="turbo">${S.turbo>0?Math.ceil(S.turbo)+'s':(S.lvl>=3?fm(1200):'Miễn phí')}</button></div>`+
    `<div class="r"><div><b>🎪 Triển lãm Siêu xe Motor Show</b><br>Bật đèn Spotlight 3D, gọi Trực thăng VIP, khách đến ×2.2 & giá bán <b>+15%</b> trong 45s.</div><button data-v17="expo" ${S.motorShow>5||S.money<6000?'disabled':''}>${S.motorShow>5?'Còn '+Math.ceil(S.motorShow)+'s':fm(6000)}</button></div></div>`;
  }
  if(k==='inv'){
@@ -378,61 +428,87 @@ function updateMetropolisV17(dt){
  metropolisV17.clock+=step;
  const t=metropolisV17.clock;
 
- // Turbo overdrive accelerates staff, test-drive, and garage timers
+ // Watch S.sold so every sale path (counter, private order, used car, auction) launches 3D fireworks
+ if(S.sold!==metropolisV17.lastSold){
+  if(S.sold>metropolisV17.lastSold&&metropolisV17.fireworkTimer<=4.5)launchFireworks(0,1);
+  metropolisV17.lastSold=S.sold;
+ }
+
+ // Turbo overdrive: exact 2x speed (+100% additional step matching updS, updC test drive, and updG)
  if(S.turbo>0){
   S.turbo=Math.max(0,S.turbo-step);
-  staff.forEach(s=>{if(s.st==='MOVING')follow(s,2.2,step);if(s.st==='SERVING'&&s.c&&typeof s.c.prog==='number')s.c.prog+=step*.85});
-  if(gj&&gj.st==='FIX')gj.t+=step*1.1;
+  const sp=3.2*(1+S.train*.015),f=(1+.3*(S.spd-1))*(1+S.train*.06);
+  staff.forEach(s=>{
+   if(s.st==='MOVING')follow(s,sp,step);
+   if(s.st==='SERVING'&&s.c&&typeof s.c.prog==='number')s.c.prog+=step*f;
+  });
+  custs.forEach(c=>{
+   if(c.st==='TESTDRIVE')follow(c,c.sub==='drive'?7:2.6,step,c.sub==='drive'?1:0);
+  });
+  if(gj&&gj.st==='FIX')gj.t+=step*(1+.3*(S.gar-1));
  }
- // Motor Show event attracts more customers & animates sky spotlights
+
+ // Motor Show event attracts more customers & animates Front-Plaza Spotlights
  if(S.motorShow>0){
   S.motorShow=Math.max(0,S.motorShow-step);
   spawnT-=step*1.1;
   metropolisV17.spotlights.visible=true;
-  metropolisV17.spotBeams.forEach((cone,i)=>{
-   cone.rotation.z=Math.sin(t*1.8+i*1.2)*.38;
-   cone.rotation.x=Math.cos(t*1.4+i)*.22;
+  metropolisV17.spotBeams.forEach((pivot,i)=>{
+   pivot.rotation.z=Math.sin(t*2.1+i*1.3)*.34;
+   pivot.rotation.x=Math.cos(t*1.6+i)*.18;
   });
  }else{
   metropolisV17.spotlights.visible=empireV16.activeTimePhase!=='day';
   if(metropolisV17.spotlights.visible){
-   metropolisV17.spotBeams.forEach((cone,i)=>{cone.rotation.z=Math.sin(t*.8+i)*.22});
+   metropolisV17.spotBeams.forEach((pivot,i)=>{pivot.rotation.z=Math.sin(t*.9+i)*.22});
   }
  }
 
- // Animate VIP Helicopter flight & landing cycle on Tier 3 Helipad (or during Motor Show)
- const showHeli=(typeof v11DemoTier==='number'?v11DemoTier:S.show)>=3||S.motorShow>0;
- metropolisV17.heli.visible=showHeli;
- if(showHeli){
-  metropolisV17.heliMainRotor.rotation.y+=step*22;
-  metropolisV17.heliTailRotor.rotation.z+=step*26;
-  const cycle=t%28;
-  // 0..8s: parked/idling on helipad; 8..14s: ascent & cruise; 14..22s: approach descent; 22..28s: landed
-  let hx=29.2,hy=5.72,hz=-9.2,ry=-.4;
-  if(cycle>8&&cycle<20){
-   const p=(cycle-8)/12,ang=p*Math.PI*2;
-   hx=29.2-Math.sin(ang)*14;
-   hz=-9.2-Math.sin(ang*2)*6;
-   hy=5.72+Math.sin(p*Math.PI)*9.5;
-   ry=Math.cos(ang)*.8;
-  }
+ // Animate VIP Helicopter directly in the default camera view over the Showroom Forecourt (x: -7..+7, y: 4.8..6.2, z: -1..+3)
+ const showHeli=(typeof v11DemoTier==='number'?v11DemoTier:S.show)>=2||S.motorShow>0||S.lvl>=2;
+ metropolisV17.heli.visible=true;
+ metropolisV17.heliMainRotor.rotation.y+=step*24;
+ metropolisV17.heliTailRotor.rotation.z+=step*28;
+ {
+  const ang=t*.65;
+  const hx=Math.sin(ang)*6.8;
+  const hz=1.0+Math.cos(ang*2)*1.8;
+  const hy=4.9+Math.sin(ang*1.5)*.55+(showHeli?0:.4);
+  const ry=Math.atan2(-Math.sin(ang*2)*3.6,Math.cos(ang)*6.8);
   metropolisV17.heli.position.set(hx,hy,hz);
   metropolisV17.heli.rotation.y=ry;
+  if(metropolisV17.heliBeam){
+   metropolisV17.heliBeam.visible=S.motorShow>0||empireV16.activeTimePhase!=='day';
+  }
  }
 
  // Update 3D Hologram Price Signs & Customer Bubbles
  updateHoloBadges();
  updateCustomerBubbles();
 
- // Update 3D Fireworks particles
+ // Update 6-second multi-wave 3D Fireworks & Shockwave Rings
+ if(metropolisV17.fireworkTimer>0){
+  metropolisV17.fireworkTimer=Math.max(0,metropolisV17.fireworkTimer-step);
+  if(metropolisV17.fireworkTimer>0&&metropolisV17.fireworkTimer<=metropolisV17.nextWaveAt){
+   metropolisV17.nextWaveAt-=1.15;
+   spawnFireworkWave(metropolisV17.fireOriginX+(R()-.5)*3,metropolisV17.fireOriginZ);
+  }
+ }
  metropolisV17.fireworks.forEach(f=>{
   if(f.life<=0)return;
   f.life-=step;
-  f.v.y-=9.5*step;
+  f.v.y-=6.2*step;
   f.m.position.x+=f.v.x*step;
   f.m.position.y+=f.v.y*step;
   f.m.position.z+=f.v.z*step;
   if(f.life<=0||f.m.position.y<.2)f.m.visible=false;
+ });
+ metropolisV17.fireworkRings.forEach(r=>{
+  if(r.life<=0)return;
+  r.life-=step;
+  r.scale+=step*3.2;
+  r.m.scale.setScalar(r.scale);
+  if(r.life<=0)r.m.visible=false;
  });
 
  // Update Floating Quick-Action Dock labels

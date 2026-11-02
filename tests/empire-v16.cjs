@@ -95,8 +95,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   await page.locator('[data-o="menu"]').tap();
   assert.ok(await page.locator('.v16-chart').count(),'Management panel must render 24h profit chart');
 
-  // Verify Bug #2: Page title version matches v16.1
-  assert.equal(await page.title(),'Auto Empire Tycoon 3D v16.1','Page title must match current version v16.1');
+  // Verify Bug #1 (v17): Page title version matches v17
+  assert.equal(await page.title(),'Auto Empire Tycoon 3D v17','Page title must match current version v17');
 
   // Verify Bug #3: WebGL context lost / restored shows and hides readable banner, exposure & linear Fog intact
   const webglCheck=await page.evaluate(()=>{
@@ -147,20 +147,42 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   assert.equal(claimedCheck.leaseId,claimedCheck.tabId,'aet6-owner must be updated to current tabId');
   assert.equal(claimedCheck.money,777777,'Save aet6 must remain intact after lock takeover');
 
-  // Verify V17 Grand Metropolis: 3D Helicopter, Hologram Price Badges, Turbo, Motor Show & Quick-Action Dock
+  // Verify V17 Grand Metropolis: 3D Helicopter, Hologram Price Badges, Turbo, Motor Show, Fireworks & Default Camera Visibility
   const v17Check=await page.evaluate(()=>{
-   S.money=500000;S.show=3;
+   S.money=500000;S.show=3;S.turbo=0;S.motorShow=0;
    activateTurbo();
+   const toastTurboText=$('toast').textContent;
+   openP('show');
+   const panelHtml=$('P').innerHTML;
    startMotorShow();
-   updateMetropolisV17(.1);
+   updateMetropolisV17(.2);
    const hasDock=!!$('v17-dock');
    const heliVisible=metropolisV17.heli.visible;
    const spotVisible=metropolisV17.spotlights.visible;
    const holoVisible=metropolisV17.holoSprites.some(b=>b.sprite.visible);
+   // Verify Helicopter, Spotlights, and Fireworks are inside the default camera frustum (|NDC.x| < 0.85, |NDC.y| < 0.85)
+   cam.updateMatrixWorld();cam.updateProjectionMatrix();
+   const heliNdc=metropolisV17.heli.position.clone().project(cam);
+   const spotPos=new THREE.Vector3();
+   metropolisV17.spotBeams[1].getWorldPosition(spotPos);
+   const spotNdc=spotPos.clone().project(cam);
+   // Trigger car sale via S.sold increment and verify fireworks trigger & project into default camera frustum
+   metropolisV17.fireworks.forEach(f=>f.m.visible=false);metropolisV17.fireworkTimer=0;
+   S.sold=(S.sold||0)+1;
+   updateMetropolisV17(.1);
+   const fireworkTriggeredOnSale=metropolisV17.fireworks[0].m.visible&&metropolisV17.fireworkTimer>5;
+   const fwNdc=metropolisV17.fireworks[0].m.position.clone().project(cam);
+   const inFrustum=v=>Math.abs(v.x)<0.85&&Math.abs(v.y)<0.85;
    const beforeDeals=S.dealsClosed;
    negotiateVIP();
    return {
     hasDock,heliVisible,spotVisible,holoVisible,
+    toastTurboText,
+    panelHasX2:panelHtml.includes('×2')&&!panelHtml.includes('×1.8'),
+    heliInView:inFrustum(heliNdc),
+    spotInView:inFrustum(spotNdc),
+    fwInView:inFrustum(fwNdc),
+    fireworkTriggeredOnSale,
     turboActive:S.turbo>0,
     expoActive:S.motorShow>0&&S.showsHosted>=1,
     custCount:custs.length,
@@ -168,6 +190,12 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
    };
   });
   assert.ok(v17Check.hasDock&&v17Check.heliVisible&&v17Check.spotVisible&&v17Check.holoVisible,'V17 3D Helicopter, Spotlights, Hologram Signs & Quick Dock must be active');
+  assert.match(v17Check.toastTurboText,/×2 TỐC ĐỘ/,'Turbo toast must show ×2 TỐC ĐỘ');
+  assert.equal(v17Check.panelHasX2,true,'Showroom panel must match ×2 and not show ×1.8');
+  assert.equal(v17Check.heliInView,true,'Helicopter must be visible inside default camera frustum');
+  assert.equal(v17Check.spotInView,true,'Motor Show spotlights must be visible inside default camera frustum');
+  assert.equal(v17Check.fireworkTriggeredOnSale,true,'Incrementing S.sold must trigger 3D fireworks');
+  assert.equal(v17Check.fwInView,true,'Fireworks must burst inside default camera frustum');
   assert.ok(v17Check.turboActive&&v17Check.expoActive&&v17Check.custCount>=1,'V17 Turbo Overdrive, Motor Show Expo & VIP Negotiation must function');
 
   assert.deepEqual(errors,[]);

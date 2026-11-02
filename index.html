@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<link rel="icon" href="data:,"><meta name="theme-color" content="#152b45"><meta name="apple-mobile-web-app-capable" content="yes"><title>Auto Empire Tycoon 3D v16.1</title>
+<link rel="icon" href="data:,"><meta name="theme-color" content="#152b45"><meta name="apple-mobile-web-app-capable" content="yes"><title>Auto Empire Tycoon 3D v17</title>
 </head><body>
 <div id="hud"><div class="pill" id="money">$0</div><div class="pill" id="gems">0</div><div class="pill" id="rep">★ 0</div>
 <div class="pill" id="lvp"><span id="lvt">Cấp 1</span><div id="xpb"><div id="xpf"></div></div></div><div id="mb"></div></div>
@@ -8,22 +8,37 @@
 <div id="nav"><button data-o="show"><span>🏢</span>Showroom</button><button data-o="inv"><span>📦</span>Kho xe</button><button data-o="staff"><span>👔</span>Nhân viên</button><button data-o="mis"><span>🎯</span>Nhiệm vụ</button><button data-o="menu"><span>⚙️</span>Quản lý</button></div>
 <div id="modal"><div><h3 id="mt"></h3><p id="mp"></p><button class="btn" onclick="if(typeof claimTabLock==='function'&&!owner)claimTabLock();else document.getElementById('modal').style.display='none'">Nhận</button></div></div>
 <script>
-(async()=>{
-const current={"build": "3d735430c7a54130", "game": "./dist/game.0e49d968cfc3e453.js", "css": "./dist/game.4f4ebdc49bae6f0c.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "skeleton": "./vendor/SkeletonUtils-r128.js?v=cc2e2e1a3183ab55", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
+(()=>{
+const current={"build": "147c8f20f2fe4eca", "game": "./dist/game.aef101378aa77d1a.js", "css": "./dist/game.4f4ebdc49bae6f0c.css", "vendor": "./vendor/three-r128.min.js?v=9274bbcec8d96168", "loader": "./vendor/GLTFLoader-r128.js?v=5c15967ba830918a", "skeleton": "./vendor/SkeletonUtils-r128.js?v=cc2e2e1a3183ab55", "manifest": "./dist/manifest.e8811bd13e484d88.webmanifest"};
 const manifestLink=document.createElement('link');manifestLink.rel='manifest';manifestLink.href=current.manifest;document.head.append(manifestLink);
 let pending=null,requested=false;
 const button=document.createElement('button');button.id='game-update';button.textContent='Cập nhật game';button.style.cssText='position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);z-index:1000;padding:12px;border-radius:12px;border:1px solid #e8c58a;background:#142f46;color:#fff;display:none';document.body.append(button);
 const load=(tag,attrs)=>new Promise((resolve,reject)=>{const e=document.createElement(tag);Object.assign(e,attrs);e.onload=resolve;e.onerror=reject;document.head.append(e)});
+(async()=>{
 try{await load('link',{rel:'stylesheet',href:current.css});await load('script',{src:current.vendor});await load('script',{src:current.loader});await load('script',{src:current.skeleton});await load('script',{src:current.game})}catch(e){button.textContent='Không tải được game · Tải lại';button.style.display='block';button.onclick=()=>location.reload();return}
 if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
-function ready(reg){if(reg.waiting){pending=reg.waiting;button.style.display='block'}}
+function ready(reg,isNewBuild){
+ if(!reg.waiting||!isNewBuild)return;
+ pending=reg.waiting;
+ const state={saved:false};document.dispatchEvent(new CustomEvent('aet:before-update',{detail:state}));
+ if(state.saved){requested=true;pending.postMessage({type:'ACTIVATE'})}
+ else button.style.display='block';
+}
 async function check(){try{
  const response=await fetch('./release.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)return;const release=await response.json();
- const reg=await navigator.serviceWorker.register('./sw.js?build='+encodeURIComponent(release.build),{updateViaCache:'none'});ready(reg);reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker.addEventListener('statechange',()=>{if(worker.state==='installed')ready(reg)})});
+ const isNewBuild=release.build!==current.build;
+ if(isNewBuild){
+  const state={saved:false};document.dispatchEvent(new CustomEvent('aet:before-update',{detail:state}));
+  if(state.saved)requested=true;
+ }
+ const reg=await navigator.serviceWorker.register('./sw.js?build='+encodeURIComponent(release.build),{updateViaCache:'none'});
+ ready(reg,isNewBuild);
+ reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker.addEventListener('statechange',()=>{if(worker.state==='installed')ready(reg,isNewBuild)})});
 }catch(e){}}
 button.onclick=()=>{if(!pending)return;const state={saved:false};document.dispatchEvent(new CustomEvent('aet:before-update',{detail:state}));if(!state.saved){button.textContent='Chưa lưu được · Thử lại';return}requested=true;button.disabled=true;pending.postMessage({type:'ACTIVATE'})};
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(requested)location.replace(location.pathname+'?build='+Date.now())});
 await check();setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+})();
 })();
 </script></body></html>
 

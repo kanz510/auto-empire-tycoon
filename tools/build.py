@@ -23,7 +23,7 @@ icon=read_lf_bytes(r/'assets/icon.svg');icon_name=f'icon.{digest(icon)}.svg';(ou
 manifest=json.loads(read_utf8(r/'assets/manifest.webmanifest'));manifest['start_url']='../';manifest['scope']='../';manifest['name']='Auto Empire Tycoon 3D';manifest['icons']=[{'src':'./'+icon_name,'sizes':'any','type':'image/svg+xml','purpose':'any maskable'}]
 manifest_bytes=json.dumps(manifest).encode('utf-8');release['manifest']=f'./dist/manifest.{digest(manifest_bytes)}.webmanifest';(out/release['manifest'].split('/')[-1]).write_bytes(manifest_bytes)
 pkg=json.loads(read_utf8(r/'package.json'))
-ver_parts=str(pkg.get('version','16.1.0')).split('.')
+ver_parts=str(pkg.get('version','17.0.0')).split('.')
 ver_tag='v'+ver_parts[0]+('.'+ver_parts[1] if len(ver_parts)>1 and ver_parts[1]!='0' else '')
 boot=read_utf8(r/'src/boot.js').replace('__RELEASE__',json.dumps(release))
 shell=re.sub(r'<title>Auto Empire Tycoon 3D[^<]*</title>',f'<title>Auto Empire Tycoon 3D {ver_tag}</title>',read_utf8(r/'src/shell.html')).replace('</body>',f'<script>{boot}</script></body>')
@@ -32,13 +32,13 @@ write_utf8(r/'release.json',json.dumps(release))
 manifest=read_utf8(r/'assets/manifest.webmanifest');write_utf8(r/'manifest.webmanifest',manifest)
 files=['./','./index.html','./release.json','./manifest.webmanifest','./assets/icon.svg',release['game'],release['css'],release['vendor'],release['loader'],release['skeleton'],release['manifest'],'./dist/'+icon_name]+list(art.values())
 sw="""const BUILD=__BUILD__,CACHE='auto-empire-v8-'+BUILD,FILES=__FILES__;
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(async file=>{const url=new URL(file,self.location.href);url.searchParams.set('__build',BUILD);const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Incomplete release');if(file==='./release.json'&&(await response.clone().json()).build!==BUILD)throw Error('Mixed release');if(file==='./index.html'&&!(await response.clone().text()).includes(BUILD))throw Error('Stale shell');await c.put(file,response)}))).catch(async err=>{await caches.delete(CACHE);throw err})));
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(async file=>{const url=new URL(file,self.location.href);url.searchParams.set('__build',BUILD);const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Incomplete release');if(file==='./release.json'&&(await response.clone().json()).build!==BUILD)throw Error('Mixed release');if(file==='./index.html'&&!(await response.clone().text()).includes(BUILD))throw Error('Stale shell');await c.put(file,response)}))).then(()=>self.skipWaiting()).catch(async err=>{await caches.delete(CACHE);throw err})));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();const old=keys.filter(k=>k.startsWith('auto-empire-')&&k!==CACHE);for(const k of old)await caches.delete(k);await self.clients.claim()})()));
 self.addEventListener('fetch',e=>{
  const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin)return;
  if(u.pathname.endsWith('/release.json')){e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.open(CACHE).then(c=>c.match('./release.json'))));return}
- if(e.request.mode==='navigate'){e.respondWith(caches.open(CACHE).then(async c=>(await c.match('./index.html'))||fetch(e.request,{cache:'no-store'})));return}
+ if(e.request.mode==='navigate'){e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.open(CACHE).then(async c=>(await c.match('./index.html'))||(await c.match('./')))));return}
  e.respondWith(caches.open(CACHE).then(async c=>(await c.match(e.request))||fetch(e.request)));
 });
 """
