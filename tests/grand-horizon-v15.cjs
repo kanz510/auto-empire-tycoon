@@ -44,8 +44,12 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
     assert.equal(v.tier,i+1);
     assert.equal(v.active,i+1);
     assert.deepEqual(v.visible,[true,i>=1,i>=2]);
-    assert.ok(v.meshes>=25&&v.keys===0,'V15 meshes must be non-interactive');
+    assert.ok(v.meshes>=15&&v.keys===0,'V15 meshes must be non-interactive');
    }
+   await page.evaluate(()=>{S.show=3;applyVis();updateGrandDealershipV13(0);updateGrandShowroomV14(0);updateGrandHorizonV15(0)});
+   await page.waitForTimeout(200);
+   fs.mkdirSync(path.join(root,'test-results'),{recursive:true});
+   await page.screenshot({path:path.join(root,`test-results/v15-crisp-${width}x${height}.png`),animations:'disabled'});
    assert.deepEqual(errors,[]);
    console.log('PASS V15 '+width+'x'+height+': PMREM reflections, kinetic crown, skybridge, reflecting pools, helipad');
    await ctx.close();

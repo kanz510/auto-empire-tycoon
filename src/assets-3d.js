@@ -54,7 +54,7 @@ function paintForBody(body,k,hex){
  }
  if(count===0)throw Error('Paint swatch has no atlas pixels '+k);
  ctx.putImageData(img,0,0);
- const map=texture.clone();map.image=canvas;map.needsUpdate=true;
+ const map=texture.clone();map.image=canvas;map.anisotropy=typeof maxAniso==='number'?maxAniso:4;map.needsUpdate=true;
  // Preserve the hashed Kenney colormap so the body retains the requested
  // color while windows, lamps and wheel meshes keep their original UVs.
  // Clearcoat affects the car paint only, not the whole vehicle.

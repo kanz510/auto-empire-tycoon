@@ -3,14 +3,16 @@
 const grandV13={root:new THREE.Group(),tiers:[],active:0,animated:[],clock:0};
 grandV13.root.name='grand-dealership-v13';scene.add(grandV13.root);
 function grandMat(color,metalness=.35,roughness=.42){
- return new THREE.MeshStandardMaterial({color,metalness,roughness});
+ const m=new THREE.MeshStandardMaterial({color,metalness,roughness,envMapIntensity:.4});
+ m.color.convertSRGBToLinear();return m;
 }
 const grandGold=grandMat(0xe7c47c,.75,.25),
  grandSlate=grandMat(0x284454,.55,.38),
  grandStone=grandMat(0xcad4d0,.12,.76),
- grandGlass=new THREE.MeshStandardMaterial({color:0x89c6d4,metalness:.18,roughness:.12,transparent:true,opacity:.48,depthWrite:false}),
+ grandGlass=new THREE.MeshStandardMaterial({color:0x89c6d4,metalness:.18,roughness:.12,transparent:true,opacity:.05,depthWrite:false}),
  grandGlow=new THREE.MeshBasicMaterial({color:0xffe4aa}),
- grandGreen=grandMat(0x4c9872,.04,.95);
+ grandGreen=grandMat(0x3a8458,.04,.95);
+grandGlass.color.convertSRGBToLinear();
 function grandMesh(parent,geometry,material,x,y,z){
  const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=false;m.receiveShadow=true;parent.add(m);return m;
 }

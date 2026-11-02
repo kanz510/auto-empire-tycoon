@@ -1,4 +1,4 @@
-// V15 Grand Horizon: PMREM studio environment reflections, kinetic flagship crown,
+// V15 Grand Horizon: High-contrast PMREM studio environment reflections, kinetic flagship crown,
 // executive skybridge, reflecting pools, rooftop helipad and luxury promenade.
 // Non-interactive visual layer: no userData.key, hit[] entries or save mutations.
 const grandV15={
@@ -9,47 +9,49 @@ const grandV15={
 grandV15.root.name='grand-horizon-v15';
 scene.add(grandV15.root);
 
-// 1. Procedural PMREM Studio + Horizon Environment Map for PBR metallic/clearcoat reflections
+// 1. Dark-contrast PMREM Automotive Studio Environment Map
+// Gives metallic/clearcoat cars and polished floor crisp specular highlights
+// WITHOUT washing out diffuse grass, roads or buildings.
 (function initV15Environment(){
  if(typeof THREE.PMREMGenerator!=='function')return;
  try{
   const pmrem=new THREE.PMREMGenerator(ren);
   pmrem.compileCubemapShader();
   const envScene=new THREE.Scene();
-  envScene.background=new THREE.Color(0xbadcf2);
+  envScene.background=new THREE.Color(0x0c1824);
   const skyDome=new THREE.Mesh(
    new THREE.SphereGeometry(40,16,12),
-   new THREE.MeshBasicMaterial({color:0xdff1ff,side:THREE.BackSide})
+   new THREE.MeshBasicMaterial({color:0x132638,side:THREE.BackSide})
   );
   envScene.add(skyDome);
   const groundHemisphere=new THREE.Mesh(
    new THREE.SphereGeometry(38,16,8,0,Math.PI*2,Math.PI/2,Math.PI/2),
-   new THREE.MeshBasicMaterial({color:0x2b3e4e,side:THREE.BackSide})
+   new THREE.MeshBasicMaterial({color:0x071018,side:THREE.BackSide})
   );
   envScene.add(groundHemisphere);
-  // Studio softbox strips for crisp automotive clearcoat highlights
-  [[-14,18,12,18,3,0xfff6e5],[14,18,12,18,3,0xfff6e5],[0,24,-10,26,4,0xffffff],[0,10,22,24,2.5,0xffdf9e]].forEach(([x,y,z,w,h,col])=>{
+  // High-contrast studio key strips for sharp automotive clearcoat reflections
+  [[-16,20,14,16,2.2,0xfff3d6],[16,20,14,16,2.2,0xfff3d6],[0,26,-12,24,2.8,0xffffff],[0,12,24,20,1.8,0xf5ca7b]].forEach(([x,y,z,w,h,col])=>{
    const strip=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:col,side:THREE.DoubleSide}));
    strip.position.set(x,y,z);strip.lookAt(0,0,0);envScene.add(strip);
   });
-  const rt=pmrem.fromScene(envScene,.035);
+  const rt=pmrem.fromScene(envScene,.02);
   scene.environment=rt.texture;
   grandV15.envReady=!!scene.environment;
   pmrem.dispose();
  }catch(e){console.warn('V15 PMREM fallback:',e)}
 })();
 
-// 2. High-detail procedural travertine + brass inlay texture for the luxury plaza
+// 2. High-detail procedural slate-travertine + brass inlay texture for the luxury plaza
 const v15PlazaCanvas=document.createElement('canvas');
 v15PlazaCanvas.width=v15PlazaCanvas.height=256;
 {
  const c=v15PlazaCanvas.getContext('2d');
- c.fillStyle='#e6e1d6';c.fillRect(0,0,256,256);
+ c.fillStyle='#2b3945';c.fillRect(0,0,256,256);
  for(let y=0;y<256;y+=64){
   for(let x=0;x<256;x+=64){
-   c.fillStyle=((x+y)/64)%2===0?'#ece7dc':'#dfd9cc';
+   c.fillStyle=((x+y)/64)%2===0?'#324250':'#263440';
    c.fillRect(x+2,y+2,60,60);
-   c.strokeStyle='#c9ad79';c.lineWidth=1.5;
+   c.strokeStyle='#c9a66b';c.lineWidth=1.5;
    c.strokeRect(x+1,y+1,62,62);
   }
  }
@@ -58,22 +60,27 @@ const v15PlazaTex=new THREE.CanvasTexture(v15PlazaCanvas);
 v15PlazaTex.wrapS=v15PlazaTex.wrapT=THREE.RepeatWrapping;
 v15PlazaTex.repeat.set(16,3);
 v15PlazaTex.encoding=THREE.sRGBEncoding;
+v15PlazaTex.anisotropy=typeof maxAniso==='number'?maxAniso:4;
 
+function v15StdMat(color,metalness,roughness){
+ const m=new THREE.MeshStandardMaterial({color,metalness,roughness});
+ m.color.convertSRGBToLinear();return m;
+}
 const V15M={
- obsidian:new THREE.MeshStandardMaterial({color:0x132430,metalness:.62,roughness:.24}),
- champagne:new THREE.MeshStandardMaterial({color:0xe5c384,metalness:.84,roughness:.18}),
- brushedSteel:new THREE.MeshStandardMaterial({color:0xcad6de,metalness:.78,roughness:.22}),
- marble:new THREE.MeshStandardMaterial({map:v15PlazaTex,roughness:.28,metalness:.14}),
- glass:new THREE.MeshPhysicalMaterial({color:0xa8e0f0,metalness:.08,roughness:.08,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}),
- water:new THREE.MeshStandardMaterial({color:0x3fa7bd,metalness:.35,roughness:.12}),
+ obsidian:v15StdMat(0x11202b,.65,.22),
+ champagne:v15StdMat(0xe2bc76,.85,.18),
+ brushedSteel:v15StdMat(0xc4d2dc,.8,.2),
+ marble:new THREE.MeshStandardMaterial({map:v15PlazaTex,roughness:.3,metalness:.18}),
+ glass:new THREE.MeshPhysicalMaterial({color:0x68b8d4,metalness:.08,roughness:.08,transparent:true,opacity:.08,depthWrite:false,side:THREE.DoubleSide}),
+ water:v15StdMat(0x187c96,.4,.12),
  glowGold:new THREE.MeshBasicMaterial({color:0xffdf9a}),
- glowCyan:new THREE.MeshBasicMaterial({color:0x8be9fd}),
- foliage:new THREE.MeshStandardMaterial({color:0x357e63,roughness:.9,metalness:.04})
+ glowCyan:new THREE.MeshBasicMaterial({color:0x6be6ff})
 };
+V15M.glass.color.convertSRGBToLinear();
 
 function v15Add(parent,geo,mat,x,y,z){
  const m=new THREE.Mesh(geo,mat);
- m.position.set(x,y,z);m.receiveShadow=true;
+ m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
  parent.add(m);return m;
 }
 function v15Box(parent,w,h,d,mat,x,y,z){
@@ -84,7 +91,7 @@ function v15Tier(level){
  grandV15.tiers[level]=g;grandV15.root.add(g);return g;
 }
 
-// Tier 1: Luxury travertine promenade, twin reflecting pools, showroom ceiling light blades & digital monolith totem
+// Tier 1: Dark slate-brass promenade, twin reflecting pools, rear gallery accent wall & digital monolith totem
 {
  const g=v15Tier(1);
  const promenade=v15Box(g,52,.04,3.2,V15M.marble,5.6,.175,5.1);
@@ -102,13 +109,13 @@ function v15Tier(level){
   g.add(poolGroup);
  }
 
- // Interior ceiling architectural light blades above the showroom floor
- const pergola=new THREE.Group();pergola.name='grand-v15-ceiling-pergola';
- for(const x of [-11,-5.5,0,5.5,11]){
-  v15Box(pergola,.14,.12,11.6,V15M.obsidian,x,4.02,-4.6);
-  v15Box(pergola,.06,.04,11.2,V15M.glowGold,x,3.95,-4.6);
+ // Rear showroom architectural accent ribs (along back wall z = -11.3, never obstructing camera view of cars)
+ const rearWall=new THREE.Group();rearWall.name='grand-v15-rear-backdrop';
+ for(const x of [-12,-6,0,6,12]){
+  v15Box(rearWall,.22,4.4,.24,V15M.obsidian,x,2.3,-11.3);
+  v15Box(rearWall,.08,4.1,.08,V15M.glowGold,x,2.3,-11.15);
  }
- g.add(pergola);
+ g.add(rearWall);
 
  // Roadside Digital Brand Monolith Totem
  const totem=new THREE.Group();totem.name='grand-v15-totem';
@@ -118,39 +125,39 @@ function v15Tier(level){
  const tc=document.createElement('canvas');tc.width=256;tc.height=512;
  const ctx=tc.getContext('2d');
  const grad=ctx.createLinearGradient(0,0,0,512);
- grad.addColorStop(0,'#0f2838');grad.addColorStop(1,'#193e54');
+ grad.addColorStop(0,'#0b1d2a');grad.addColorStop(1,'#133145');
  ctx.fillStyle=grad;ctx.fillRect(0,0,256,512);
- ctx.strokeStyle='#e5c384';ctx.lineWidth=6;ctx.strokeRect(14,14,228,484);
+ ctx.strokeStyle='#e2bc76';ctx.lineWidth=6;ctx.strokeRect(14,14,228,484);
  ctx.fillStyle='#ffe2a6';ctx.font='bold 34px system-ui,sans-serif';ctx.textAlign='center';
  ctx.fillText('AUTO',128,110);ctx.fillText('EMPIRE',128,152);
- ctx.fillStyle='#8be9fd';ctx.font='600 20px system-ui,sans-serif';
+ ctx.fillStyle='#6be6ff';ctx.font='600 20px system-ui,sans-serif';
  ctx.fillText('LUXURY GALLERY',128,215);
- ctx.fillStyle='#e5c384';ctx.fillRect(48,250,160,3);
+ ctx.fillStyle='#e2bc76';ctx.fillRect(48,250,160,3);
  ctx.fillStyle='#ffffff';ctx.font='500 22px system-ui,sans-serif';
  ctx.fillText('VIP TEST DRIVE',128,315);
  ctx.fillText('CERTIFIED CARE',128,355);
- ctx.fillStyle='#acf0cc';ctx.font='bold 26px system-ui,sans-serif';
+ ctx.fillStyle='#8bf28b';ctx.font='bold 26px system-ui,sans-serif';
  ctx.fillText('OPEN 24/7',128,435);
- const totemTex=new THREE.CanvasTexture(tc);totemTex.encoding=THREE.sRGBEncoding;
+ const totemTex=new THREE.CanvasTexture(tc);totemTex.encoding=THREE.sRGBEncoding;totemTex.anisotropy=typeof maxAniso==='number'?maxAniso:4;
  v15Add(totem,new THREE.PlaneGeometry(1.18,3.6),new THREE.MeshBasicMaterial({map:totemTex,side:THREE.DoubleSide}),-15.4,2.42,8.6);
  g.add(totem);
 }
 
-// Tier 2: Executive Glass Skybridge & Premium Wing Rooftop Terrace
+// Tier 2: Executive Glass Skybridge & Premium Wing Colonnade
 {
  const g=v15Tier(2);
  const bridge=new THREE.Group();bridge.name='grand-v15-skybridge';
- v15Box(bridge,3.8,.22,3.4,V15M.obsidian,15.8,4.55,-4.5);
- v15Box(bridge,3.8,.08,3.52,V15M.champagne,15.8,4.68,-4.5);
- v15Box(bridge,3.8,1.55,.08,V15M.glass,15.8,5.42,-2.85);
- v15Box(bridge,3.8,1.55,.08,V15M.glass,15.8,5.42,-6.15);
- v15Box(bridge,3.8,.14,3.5,V15M.obsidian,15.8,6.22,-4.5);
- v15Box(bridge,3.6,.04,.12,V15M.glowGold,15.8,4.42,-2.82);
+ v15Box(bridge,3.4,.22,2.6,V15M.obsidian,15.8,4.6,-9.6);
+ v15Box(bridge,3.4,.08,2.72,V15M.champagne,15.8,4.73,-9.6);
+ v15Box(bridge,3.4,1.35,.06,V15M.glass,15.8,5.38,-8.3);
+ v15Box(bridge,3.4,1.35,.06,V15M.glass,15.8,5.38,-10.9);
+ v15Box(bridge,3.4,.14,2.7,V15M.obsidian,15.8,6.12,-9.6);
+ v15Box(bridge,3.2,.05,.1,V15M.glowGold,15.8,4.48,-8.28);
  g.add(bridge);
 
- // Illuminated fin colonnade along the Premium Gallery wing
+ // Illuminated fin colonnade along the outer edge of the Premium Gallery wing
  for(const z of [-10.5,-7.5,-4.5,-1.5,1.5]){
-  v15Box(g,.14,4.8,.32,V15M.champagne,32.55,2.6,z);
+  v15Box(g,.16,4.8,.32,V15M.champagne,32.55,2.6,z);
   v15Box(g,.06,4.4,.08,V15M.glowGold,32.68,2.6,z);
  }
 }
@@ -159,7 +166,7 @@ function v15Tier(level){
 {
  const g=v15Tier(3);
  const crown=new THREE.Group();crown.name='grand-v15-kinetic-crown';
- crown.position.set(5.6,10.35,4.65);
+ crown.position.set(5.6,10.55,-10.2);
  const outerRing=new THREE.Mesh(new THREE.TorusGeometry(1.35,.075,10,48),V15M.champagne);
  const innerRing=new THREE.Mesh(new THREE.TorusGeometry(.92,.055,10,36),V15M.brushedSteel);
  const coreStar=new THREE.Mesh(new THREE.OctahedronGeometry(.38,0),V15M.champagne);
@@ -167,27 +174,19 @@ function v15Tier(level){
  grandV15.rings.push(outerRing,innerRing,coreStar);
  g.add(crown);
 
- // Panoramic rooftop atrium ribs spanning the flagship roof
- const atrium=new THREE.Group();atrium.name='grand-v15-skylight-atrium';
- for(const x of [-12,-6,0,6,12,18]){
-  v15Box(atrium,.18,.18,8.4,V15M.champagne,x,8.28,-4.5);
- }
- v15Box(atrium,32,.07,8.2,V15M.glass,3,8.24,-4.5);
- g.add(atrium);
-
- // Executive VIP Helipad on the level-2/3 gallery roof
+ // Executive VIP Helipad positioned cleanly on the far-right gallery terrace (outside car podium sightlines)
  const helipad=new THREE.Group();helipad.name='grand-v15-helipad';
- helipad.position.set(24.4,5.52,-4.7);
- v15Add(helipad,new THREE.CylinderGeometry(3.4,3.6,.14,32),V15M.obsidian,0,0,0);
- const padRing=v15Add(helipad,new THREE.TorusGeometry(2.85,.08,8,36),V15M.champagne,0,.09,0);
+ helipad.position.set(29.2,5.55,-9.2);
+ v15Add(helipad,new THREE.CylinderGeometry(2.8,3.0,.16,32),V15M.obsidian,0,0,0);
+ const padRing=v15Add(helipad,new THREE.TorusGeometry(2.35,.07,8,36),V15M.champagne,0,.1,0);
  padRing.rotation.x=Math.PI/2;
  // 'H' marking in brushed gold
- v15Box(helipad,.32,.04,2.2,V15M.glowGold,-.85,.09,0);
- v15Box(helipad,.32,.04,2.2,V15M.glowGold,.85,.09,0);
- v15Box(helipad,1.7,.04,.32,V15M.glowGold,0,.09,0);
+ v15Box(helipad,.26,.04,1.8,V15M.glowGold,-.7,.1,0);
+ v15Box(helipad,.26,.04,1.8,V15M.glowGold,.7,.1,0);
+ v15Box(helipad,1.4,.04,.26,V15M.glowGold,0,.1,0);
  for(let i=0;i<8;i++){
   const a=i*Math.PI/4;
-  const beacon=v15Add(helipad,new THREE.SphereGeometry(.11,8,6),V15M.glowCyan,Math.cos(a)*3.15,.12,Math.sin(a)*3.15);
+  const beacon=v15Add(helipad,new THREE.SphereGeometry(.1,8,6),V15M.glowCyan,Math.cos(a)*2.6,.13,Math.sin(a)*2.6);
   grandV15.beacons.push(beacon);
  }
  g.add(helipad);

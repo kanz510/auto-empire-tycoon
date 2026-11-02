@@ -15,20 +15,20 @@ scene.add(cityV12.root);
 // A secondary street is behind the dealership. The original traffic road, garage,
 // showroom floor, parking positions and customer walking paths remain untouched.
 cityV12.roads.add(
- box(142,.075,7.4,0x46525c,0,.035,-22.5),
- box(8.2,.075,42,0x46525c,47,.04,-40),
- box(142,.24,1.22,0xc1c1b5,0,.13,-27.1),
- box(142,.24,1.24,0xc1c1b5,0,.13,-17.88),
- box(1.23,.24,42,0xc1c1b5,42.4,.13,-40),
- box(1.23,.24,42,0xc1c1b5,51.6,.13,-40),
- box(18,.10,15,0x668d70,-43,.055,-3.2),
- box(15.7,.065,2.1,0xd4ccad,-43,.09,-3.3),
- box(2.15,.065,13.8,0xd4ccad,-43,.1,-3.3),
+ box(260,.075,7.4,0x2a333c,0,.035,-22.5),
+ box(8.2,.075,42,0x2a333c,47,.04,-40),
+ box(260,.24,1.22,0xb5b4a8,0,.13,-27.1),
+ box(260,.24,1.24,0xb5b4a8,0,.13,-17.88),
+ box(1.23,.24,42,0xb5b4a8,42.4,.13,-40),
+ box(1.23,.24,42,0xb5b4a8,51.6,.13,-40),
+ box(18,.10,15,0x3c7d48,-43,.055,-3.2),
+ box(15.7,.065,2.1,0xc9bea0,-43,.09,-3.3),
+ box(2.15,.065,13.8,0xc9bea0,-43,.1,-3.3),
  // Across from the original traffic street, a landscaped forecourt fills
  // the empty foreground without touching parking or customer routes.
- box(35,.10,14.5,0x779f7d,0,.06,27),
- box(36,.07,2.4,0xd7cdb7,0,.11,18.9),
- box(2.4,.07,14,0xd7cdb7,-1,.115,27)
+ box(35,.10,14.5,0x3f8449,0,.06,27),
+ box(36,.07,2.4,0xcbc0aa,0,.11,18.9),
+ box(2.4,.07,14,0xcbc0aa,-1,.115,27)
 );
 const avenueStripe=new THREE.InstancedMesh(
  new THREE.BoxGeometry(1.6,.025,.09),M(0xf5d68a,{roughness:.88}),40
@@ -114,7 +114,18 @@ function cityImport(key,put){
 }
 function cityFit(template,w,h,d){
  const root=fitKenney(template,w,h,d);
- root.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true}});
+ root.traverse(o=>{
+  if(!o.isMesh)return;
+  o.castShadow=true;o.receiveShadow=true;
+  if(o.material&&!Array.isArray(o.material)){
+   const m=o.material.clone();
+   if(m.color){const hsl={h:0,s:0,l:0};m.color.getHSL(hsl);m.color.setHSL(hsl.h,Math.min(1,hsl.s*1.35),Math.max(.08,hsl.l*.86))}
+   m.roughness=Math.min(.68,m.roughness??.7);
+   m.envMapIntensity=.35;
+   if(m.map)m.map.anisotropy=typeof maxAniso==='number'?maxAniso:4;
+   o.material=m;
+  }
+ });
  return root;
 }
 ['city-commercial-a','city-commercial-c','city-commercial-g','city-commercial-h','city-suburban-h']
