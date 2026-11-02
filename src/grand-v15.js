@@ -12,8 +12,8 @@ scene.add(grandV15.root);
 // 1. Dark-contrast PMREM Automotive Studio Environment Map
 // Gives metallic/clearcoat cars and polished floor crisp specular highlights
 // WITHOUT washing out diffuse grass, roads or buildings.
-(function initV15Environment(){
- if(typeof THREE.PMREMGenerator!=='function')return;
+function initV15Environment(){
+ if(webglLost||typeof THREE.PMREMGenerator!=='function')return;
  try{
   const pmrem=new THREE.PMREMGenerator(ren);
   pmrem.compileCubemapShader();
@@ -39,7 +39,8 @@ scene.add(grandV15.root);
   grandV15.envReady=!!scene.environment;
   pmrem.dispose();
  }catch(e){console.warn('V15 PMREM fallback:',e)}
-})();
+}
+initV15Environment();
 
 // 2. High-detail procedural slate-travertine + brass inlay texture for the luxury plaza
 const v15PlazaCanvas=document.createElement('canvas');

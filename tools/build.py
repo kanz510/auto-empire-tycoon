@@ -1,5 +1,5 @@
 from pathlib import Path
-import hashlib,json,shutil
+import hashlib,json,re,shutil
 r=Path(__file__).resolve().parents[1]
 order=['models','save-state','graphics','visual-v9','assets-3d','characters-v11','showroom-v11','preview-v11','city-v12','grand-v13','grand-v14','grand-v15','economy','gameplay','ai','ui','empire-v16','main','lifecycle']
 digest=lambda b:hashlib.sha256(b).hexdigest()[:16]
@@ -22,8 +22,11 @@ release={'build':build,'game':f'./dist/game.{digest(game)}.js','css':f'./dist/ga
 icon=read_lf_bytes(r/'assets/icon.svg');icon_name=f'icon.{digest(icon)}.svg';(out/icon_name).write_bytes(icon)
 manifest=json.loads(read_utf8(r/'assets/manifest.webmanifest'));manifest['start_url']='../';manifest['scope']='../';manifest['name']='Auto Empire Tycoon 3D';manifest['icons']=[{'src':'./'+icon_name,'sizes':'any','type':'image/svg+xml','purpose':'any maskable'}]
 manifest_bytes=json.dumps(manifest).encode('utf-8');release['manifest']=f'./dist/manifest.{digest(manifest_bytes)}.webmanifest';(out/release['manifest'].split('/')[-1]).write_bytes(manifest_bytes)
+pkg=json.loads(read_utf8(r/'package.json'))
+ver_parts=str(pkg.get('version','16.1.0')).split('.')
+ver_tag='v'+ver_parts[0]+('.'+ver_parts[1] if len(ver_parts)>1 and ver_parts[1]!='0' else '')
 boot=read_utf8(r/'src/boot.js').replace('__RELEASE__',json.dumps(release))
-shell=read_utf8(r/'src/shell.html').replace('</body>',f'<script>{boot}</script></body>')
+shell=re.sub(r'<title>Auto Empire Tycoon 3D[^<]*</title>',f'<title>Auto Empire Tycoon 3D {ver_tag}</title>',read_utf8(r/'src/shell.html')).replace('</body>',f'<script>{boot}</script></body>')
 write_utf8(r/'index.html',shell)
 write_utf8(r/'release.json',json.dumps(release))
 manifest=read_utf8(r/'assets/manifest.webmanifest');write_utf8(r/'manifest.webmanifest',manifest)

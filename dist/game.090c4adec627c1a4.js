@@ -75,10 +75,37 @@ S.displayData=Array.isArray(S.displayData)?S.displayData.slice(0,6):[];
 S.stats=Object.fromEntries(['cars','garage','test','offline'].map(k=>[k,Math.max(0,Number(S.stats?.[k])||0)]));
 S.history=Array.isArray(S.history)?S.history.filter(x=>x&&Number.isFinite(x.hour)&&Number.isFinite(x.profit)).slice(-24):[];
 S.quality=['auto','eco','high'].includes(S.quality)?S.quality:'auto';
+const LOCK_KEY='aet6-owner',LOCK_TTL=12000;
 const tabId=Date.now().toString(36)+Math.random().toString(36).slice(2);
-let owner=true,storageOK=true;
-function ownSave(){try{const lease=JSON.parse(localStorage.getItem('aet6-owner')||'null');return !lease||lease.id===tabId||Date.now()-lease.at>15000}catch(e){return true}}
-function lease(){if(!ownSave()){owner=false;return}try{localStorage.setItem('aet6-owner',JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}}
+let owner=true,storageOK=true,lockModalShown=false;
+function readLease(){
+ try{
+  const l=JSON.parse(localStorage.getItem(LOCK_KEY)||'null');
+  return (l&&typeof l==='object'&&typeof l.id==='string'&&Number.isFinite(Number(l.at)))?{id:l.id,at:Number(l.at)}:null;
+ }catch(e){return null}
+}
+function ownSave(){
+ const l=readLease(),now=Date.now();
+ return !l||l.id===tabId||now-l.at>LOCK_TTL||l.at>now+2000;
+}
+function lease(){
+ if(!ownSave()){owner=false;return false}
+ owner=true;
+ if(lockModalShown&&typeof $==='function'&&$('modal')){
+  lockModalShown=false;
+  $('modal').style.display='none';
+ }
+ try{localStorage.setItem(LOCK_KEY,JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}
+ return true;
+}
+function releaseLease(){
+ try{const l=readLease();if(l&&l.id===tabId)localStorage.removeItem(LOCK_KEY)}catch(e){}
+}
+function claimTabLock(){
+ owner=true;lockModalShown=false;
+ try{localStorage.setItem(LOCK_KEY,JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}
+ if(typeof $==='function'&&$('modal'))$('modal').style.display='none';
+}
 lease();
 function market(k){const i=KS.indexOf(k),epoch=Math.floor(Date.now()/600000);return {buy:1+.035*Math.sin(epoch*1.71+i*2),sell:1+.055*Math.sin(epoch*.83+i*1.9),demand:1+.2*Math.sin(epoch*.83+i*1.9)}}
 function choosePreferred(keys){let n=R()*keys.reduce((a,k)=>a+market(k).demand,0);for(const k of keys){n-=market(k).demand;if(n<=0)return k}return keys[0]}
@@ -96,7 +123,37 @@ const fm=n=>'$'+Math.floor(n).toLocaleString('en-US'),need=l=>Math.round(120*Mat
 let resetting=false;
 function save(f){if(resetting||!owner||!ownSave())return false;if(f||!document.hidden)S.t=Date.now();S.displayData=slots.map(d=>({basis:d.basis||0}));S.garEscrow=gj?gj.bc:0;S.disp=slots.map(d=>d.car?d.car+(d.cons?'*':''):'');try{const raw=JSON.stringify(S);localStorage.setItem('aet6',raw);localStorage.setItem('aet6-backup',raw);storageOK=true;return true}catch(e){storageOK=false;toast('Không lưu được: bộ nhớ trình duyệt bị chặn hoặc đầy')}}
 // ---------- cảnh
-const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});const maxAniso=ren.capabilities.getMaxAnisotropy?ren.capabilities.getMaxAnisotropy():4;ren.setPixelRatio(Math.min(devicePixelRatio,2.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
+let webglLost=false,ren;
+function showWebGLError(msg){
+ let el=$('webgl-error');
+ if(!el){
+  el=document.createElement('div');el.id='webgl-error';
+  el.style.cssText='position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 96px);z-index:999;background:rgba(140,24,24,.95);border:1px solid #ff8a80;color:#fff;padding:10px 14px;border-radius:12px;font:700 13px/1.4 system-ui,sans-serif;text-align:center;box-shadow:0 4px 16px #0008';
+  document.body.appendChild(el);
+ }
+ el.textContent=msg;el.style.display='block';
+}
+function hideWebGLError(){const el=$('webgl-error');if(el)el.style.display='none'}
+try{ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'})}
+catch(e1){try{ren=new THREE.WebGLRenderer({antialias:false})}catch(e2){showWebGLError('Không thể khởi tạo đồ họa 3D (WebGL): '+(e2.message||e1.message));throw e2}}
+const maxAniso=ren.capabilities.getMaxAnisotropy?ren.capabilities.getMaxAnisotropy():4;ren.setPixelRatio(Math.min(devicePixelRatio,2.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
+{
+ const gl=ren.getContext&&ren.getContext();
+ if(!gl||(gl.isContextLost&&gl.isContextLost())){
+  webglLost=true;
+  showWebGLError('Đồ họa 3D (WebGL) bị mất kết nối GPU hoặc trình duyệt không hỗ trợ WebGL.');
+ }
+ ren.domElement.addEventListener('webglcontextlost',e=>{
+  e.preventDefault();webglLost=true;
+  showWebGLError('Đồ họa 3D (WebGL) bị gián đoạn kết nối GPU. Đang tự động khôi phục...');
+ },false);
+ ren.domElement.addEventListener('webglcontextrestored',()=>{
+  webglLost=false;hideWebGLError();
+  setQuality();
+  if(typeof initV15Environment==='function')initV15Environment();
+  if(typeof updCam==='function'&&typeof scene!=='undefined'&&typeof cam!=='undefined'){updCam();ren.render(scene,cam)}
+ },false);
+}
 let adaptiveDpr=Math.min(devicePixelRatio,2.5),qualityClock=0,qualityFrames=0;
 function setQuality(){ren.setPixelRatio(S.quality==='eco'?1.25:S.quality==='high'?Math.min(devicePixelRatio,3):adaptiveDpr);ren.shadowMap.enabled=S.quality!=='eco';fit()}
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x469242);scene.fog=new THREE.Fog(0x78b9e6,240,420);
@@ -1110,8 +1167,8 @@ scene.add(grandV15.root);
 // 1. Dark-contrast PMREM Automotive Studio Environment Map
 // Gives metallic/clearcoat cars and polished floor crisp specular highlights
 // WITHOUT washing out diffuse grass, roads or buildings.
-(function initV15Environment(){
- if(typeof THREE.PMREMGenerator!=='function')return;
+function initV15Environment(){
+ if(webglLost||typeof THREE.PMREMGenerator!=='function')return;
  try{
   const pmrem=new THREE.PMREMGenerator(ren);
   pmrem.compileCubemapShader();
@@ -1137,7 +1194,8 @@ scene.add(grandV15.root);
   grandV15.envReady=!!scene.environment;
   pmrem.dispose();
  }catch(e){console.warn('V15 PMREM fallback:',e)}
-})();
+}
+initV15Environment();
 
 // 2. High-detail procedural slate-travertine + brass inlay texture for the luxury plaza
 const v15PlazaCanvas=document.createElement('canvas');
@@ -1577,6 +1635,7 @@ function applyAtmosphere(phase){
  sun.color.setHex(th.sunCol);sun.intensity=th.sunInt;
  fill.color.setHex(th.fillCol);fill.intensity=th.fillInt;
  empireV16.nightLights.visible=th.night;
+ if(!webglLost&&typeof updCam==='function'&&typeof cam!=='undefined'){updCam();ren.render(scene,cam)}
 }
 function cycleTimeMode(){
  const order=['day','sunset','night','auto'];
@@ -1939,14 +1998,25 @@ function updateEmpireV16(dt){
 // ---------- khởi tạo
 for(let i=0;i<S.staff;i++)addStaff(i);
 slots.forEach((d,i)=>{const s=(S.disp||[])[i];if(i<NSL()&&s&&CARS[s.replace('*','')]){d.nextBasis=Math.max(1,Math.min(CARS[s.replace('*','')].cost*2,Number(S.displayData[i]?.basis)||CARS[s.replace('*','')].cost));mount(d,s.replace('*',''),s.endsWith('*'))};d.t=0});
-applyVis();claimOffline();fillSlots();fit();setQuality();save(true);
-addEventListener('pagehide',()=>{updRpm();save(true);try{if(ownSave())localStorage.removeItem('aet6-owner')}catch(e){}});addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){updRpm();save(true)}else{claimOffline();sales.length=0;t0=performance.now();last=performance.now()}});
-setInterval(()=>{lease();if(!owner){$('mt').textContent='Game đang mở ở tab khác';$('mp').textContent='Đóng tab kia rồi tải lại tab này để tiếp tục từ bản lưu mới nhất.';$('modal').style.display='flex';return}if(document.hidden)return;updRpm();save()},5000);
+applyVis();claimOffline();fillSlots();fit();setQuality();updCam();if(!webglLost)ren.render(scene,cam);save(true);
+const onTabExit=()=>{if(!resetting){updRpm();save(true);releaseLease()}};
+addEventListener('beforeunload',onTabExit);
+addEventListener('pagehide',onTabExit);
+addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){updRpm();save(true)}else{lease();claimOffline();sales.length=0;t0=performance.now();last=performance.now()}});
+function showLockModal(){
+ if(lockModalShown)return;
+ lockModalShown=true;
+ $('mt').textContent='Game đang mở ở tab khác';
+ $('mp').textContent='Đóng tab kia hoặc bấm Nhận để tiếp tục chơi tại tab này từ bản lưu mới nhất.';
+ $('modal').style.display='flex';
+}
+if(!owner)showLockModal();
+setInterval(()=>{if(document.hidden&&!owner)return;lease();if(!owner){showLockModal();return}if(document.hidden)return;updRpm();save()},4000);
 let last=performance.now(),hudT=0,tm=0;
-function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const minDpr=Math.min(devicePixelRatio,1.75),maxDpr=Math.min(devicePixelRatio,2.5);const next=Math.max(minDpr,Math.min(maxDpr,adaptiveDpr+(fps<35?-.15:fps>55?.1:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden||!owner)return;
- while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}
- updCam();ren.render(scene,cam)}
+function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const minDpr=Math.min(devicePixelRatio,1.75),maxDpr=Math.min(devicePixelRatio,2.5);const next=Math.max(minDpr,Math.min(maxDpr,adaptiveDpr+(fps<35?-.15:fps>55?.1:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden)return;
+ if(owner){while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}}
+ updCam();if(!webglLost)ren.render(scene,cam)}
 function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;S.sold++;recordIncome('cars',800);addXP(10+2600/150);sales.push([performance.now(),800]);toast('Đã bán xe cũ: lãi $800');save()}}
  if(S.training>0){S.training=Math.max(0,S.training-dt);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false;toast('Đào tạo hoàn tất!');save()}}
  if(S.mkt>0)S.mkt=Math.max(0,S.mkt-dt);

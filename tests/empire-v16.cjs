@@ -95,8 +95,60 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   await page.locator('[data-o="menu"]').tap();
   assert.ok(await page.locator('.v16-chart').count(),'Management panel must render 24h profit chart');
 
+  // Verify Bug #2: Page title version matches v16.1
+  assert.equal(await page.title(),'Auto Empire Tycoon 3D v16.1','Page title must match current version v16.1');
+
+  // Verify Bug #3: WebGL context lost / restored shows and hides readable banner, exposure & linear Fog intact
+  const webglCheck=await page.evaluate(()=>{
+   const evLost=new Event('webglcontextlost',{cancelable:true});
+   ren.domElement.dispatchEvent(evLost);
+   const lostState=webglLost&&$('webgl-error')&&$('webgl-error').style.display==='block'&&$('webgl-error').textContent.includes('WebGL');
+   ren.domElement.dispatchEvent(new Event('webglcontextrestored'));
+   const restoredState=!webglLost&&$('webgl-error').style.display==='none';
+   return {lostState,restoredState,exposure:ren.toneMappingExposure,isLinearFog:!!scene.fog?.isFog};
+  });
+  assert.equal(webglCheck.lostState,true,'webglcontextlost must display a readable error banner');
+  assert.equal(webglCheck.restoredState,true,'webglcontextrestored must recover and hide error banner');
+  assert.equal(webglCheck.exposure,1.15,'toneMappingExposure must remain pinned at 1.15');
+  assert.equal(webglCheck.isLinearFog,true,'scene.fog must remain linear THREE.Fog');
+
+  // Verify Bug #1: Stale tab lock expires cleanly on load, and clicking "Nhận" claims lock permanently without deleting save
+  await page.evaluate(()=>{
+   S.money=777777;save(true);
+   localStorage.setItem('aet6-owner',JSON.stringify({id:'stale-ghost-tab',at:Date.now()-60000}));
+  });
+  await page.reload();
+  await page.waitForFunction(()=>typeof S!=='undefined'&&typeof claimTabLock==='function');
+  const staleLockCheck=await page.evaluate(()=>({
+   owner,
+   money:S.money,
+   modalDisplay:getComputedStyle($('modal')).display,
+   leaseId:readLease()?.id,
+   tabId
+  }));
+  assert.equal(staleLockCheck.owner,true,'Stale lock must be claimed automatically on load');
+  assert.equal(staleLockCheck.money,777777,'Player save aet6 must be preserved when claiming stale lock');
+  assert.equal(staleLockCheck.modalDisplay,'none','Modal must not appear when lock is stale');
+  assert.equal(staleLockCheck.leaseId,staleLockCheck.tabId,'Active tab must write its own tabId into aet6-owner');
+
+  // Simulate an active second tab lock, then click "Nhận" to take over ownership
+  await page.evaluate(()=>{
+   localStorage.setItem('aet6-owner',JSON.stringify({id:'active-other-tab',at:Date.now()}));
+   lease();if(!owner)showLockModal();
+  });
+  assert.equal(await page.evaluate(()=>!owner&&$('modal').style.display==='flex'),true,'Active second tab lock must show modal');
+  await page.locator('#modal button.btn').tap();
+  const claimedCheck=await page.evaluate(()=>{
+   lease();if(!owner)showLockModal();
+   return {owner,modalDisplay:$('modal').style.display,leaseId:readLease()?.id,tabId,money:S.money};
+  });
+  assert.equal(claimedCheck.owner,true,'Clicking Nhận must reclaim tab ownership');
+  assert.equal(claimedCheck.modalDisplay,'none','Modal must stay closed after clicking Nhận');
+  assert.equal(claimedCheck.leaseId,claimedCheck.tabId,'aet6-owner must be updated to current tabId');
+  assert.equal(claimedCheck.money,777777,'Save aet6 must remain intact after lock takeover');
+
   assert.deepEqual(errors,[]);
-  console.log('PASS V16: Infinite Contracts, VIP Hypercar Auctions, Prestige, Day/Night Neon, Custom Tuning & Paint Studio, 24h Profit Chart');
+  console.log('PASS V16.1: Infinite Contracts, VIP Auctions, Prestige, Day/Night, Tuning, Stale Lock Recovery & WebGL Diagnostics');
   await ctx.close();
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

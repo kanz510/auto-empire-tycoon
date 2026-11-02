@@ -1,5 +1,35 @@
 // ---------- cảnh
-const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});const maxAniso=ren.capabilities.getMaxAnisotropy?ren.capabilities.getMaxAnisotropy():4;ren.setPixelRatio(Math.min(devicePixelRatio,2.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
+let webglLost=false,ren;
+function showWebGLError(msg){
+ let el=$('webgl-error');
+ if(!el){
+  el=document.createElement('div');el.id='webgl-error';
+  el.style.cssText='position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 96px);z-index:999;background:rgba(140,24,24,.95);border:1px solid #ff8a80;color:#fff;padding:10px 14px;border-radius:12px;font:700 13px/1.4 system-ui,sans-serif;text-align:center;box-shadow:0 4px 16px #0008';
+  document.body.appendChild(el);
+ }
+ el.textContent=msg;el.style.display='block';
+}
+function hideWebGLError(){const el=$('webgl-error');if(el)el.style.display='none'}
+try{ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'})}
+catch(e1){try{ren=new THREE.WebGLRenderer({antialias:false})}catch(e2){showWebGLError('Không thể khởi tạo đồ họa 3D (WebGL): '+(e2.message||e1.message));throw e2}}
+const maxAniso=ren.capabilities.getMaxAnisotropy?ren.capabilities.getMaxAnisotropy():4;ren.setPixelRatio(Math.min(devicePixelRatio,2.5));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.15;document.body.prepend(ren.domElement);
+{
+ const gl=ren.getContext&&ren.getContext();
+ if(!gl||(gl.isContextLost&&gl.isContextLost())){
+  webglLost=true;
+  showWebGLError('Đồ họa 3D (WebGL) bị mất kết nối GPU hoặc trình duyệt không hỗ trợ WebGL.');
+ }
+ ren.domElement.addEventListener('webglcontextlost',e=>{
+  e.preventDefault();webglLost=true;
+  showWebGLError('Đồ họa 3D (WebGL) bị gián đoạn kết nối GPU. Đang tự động khôi phục...');
+ },false);
+ ren.domElement.addEventListener('webglcontextrestored',()=>{
+  webglLost=false;hideWebGLError();
+  setQuality();
+  if(typeof initV15Environment==='function')initV15Environment();
+  if(typeof updCam==='function'&&typeof scene!=='undefined'&&typeof cam!=='undefined'){updCam();ren.render(scene,cam)}
+ },false);
+}
 let adaptiveDpr=Math.min(devicePixelRatio,2.5),qualityClock=0,qualityFrames=0;
 function setQuality(){ren.setPixelRatio(S.quality==='eco'?1.25:S.quality==='high'?Math.min(devicePixelRatio,3):adaptiveDpr);ren.shadowMap.enabled=S.quality!=='eco';fit()}
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x469242);scene.fog=new THREE.Fog(0x78b9e6,240,420);

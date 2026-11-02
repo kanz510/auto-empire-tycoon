@@ -130,6 +130,7 @@ function applyAtmosphere(phase){
  sun.color.setHex(th.sunCol);sun.intensity=th.sunInt;
  fill.color.setHex(th.fillCol);fill.intensity=th.fillInt;
  empireV16.nightLights.visible=th.night;
+ if(!webglLost&&typeof updCam==='function'&&typeof cam!=='undefined'){updCam();ren.render(scene,cam)}
 }
 function cycleTimeMode(){
  const order=['day','sunset','night','auto'];

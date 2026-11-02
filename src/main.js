@@ -1,14 +1,25 @@
 // ---------- khởi tạo
 for(let i=0;i<S.staff;i++)addStaff(i);
 slots.forEach((d,i)=>{const s=(S.disp||[])[i];if(i<NSL()&&s&&CARS[s.replace('*','')]){d.nextBasis=Math.max(1,Math.min(CARS[s.replace('*','')].cost*2,Number(S.displayData[i]?.basis)||CARS[s.replace('*','')].cost));mount(d,s.replace('*',''),s.endsWith('*'))};d.t=0});
-applyVis();claimOffline();fillSlots();fit();setQuality();save(true);
-addEventListener('pagehide',()=>{updRpm();save(true);try{if(ownSave())localStorage.removeItem('aet6-owner')}catch(e){}});addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){updRpm();save(true)}else{claimOffline();sales.length=0;t0=performance.now();last=performance.now()}});
-setInterval(()=>{lease();if(!owner){$('mt').textContent='Game đang mở ở tab khác';$('mp').textContent='Đóng tab kia rồi tải lại tab này để tiếp tục từ bản lưu mới nhất.';$('modal').style.display='flex';return}if(document.hidden)return;updRpm();save()},5000);
+applyVis();claimOffline();fillSlots();fit();setQuality();updCam();if(!webglLost)ren.render(scene,cam);save(true);
+const onTabExit=()=>{if(!resetting){updRpm();save(true);releaseLease()}};
+addEventListener('beforeunload',onTabExit);
+addEventListener('pagehide',onTabExit);
+addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){updRpm();save(true)}else{lease();claimOffline();sales.length=0;t0=performance.now();last=performance.now()}});
+function showLockModal(){
+ if(lockModalShown)return;
+ lockModalShown=true;
+ $('mt').textContent='Game đang mở ở tab khác';
+ $('mp').textContent='Đóng tab kia hoặc bấm Nhận để tiếp tục chơi tại tab này từ bản lưu mới nhất.';
+ $('modal').style.display='flex';
+}
+if(!owner)showLockModal();
+setInterval(()=>{if(document.hidden&&!owner)return;lease();if(!owner){showLockModal();return}if(document.hidden)return;updRpm();save()},4000);
 let last=performance.now(),hudT=0,tm=0;
-function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const minDpr=Math.min(devicePixelRatio,1.75),maxDpr=Math.min(devicePixelRatio,2.5);const next=Math.max(minDpr,Math.min(maxDpr,adaptiveDpr+(fps<35?-.15:fps>55?.1:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden||!owner)return;
- while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}
- updCam();ren.render(scene,cam)}
+function loop(n){requestAnimationFrame(loop);let elapsed=Math.min(1,Math.max(0,(n-last)/1000));last=n;qualityClock+=elapsed;qualityFrames++;if(qualityClock>5){if(S.quality==='auto'){const fps=qualityFrames/qualityClock;const minDpr=Math.min(devicePixelRatio,1.75),maxDpr=Math.min(devicePixelRatio,2.5);const next=Math.max(minDpr,Math.min(maxDpr,adaptiveDpr+(fps<35?-.15:fps>55?.1:0)));if(Math.abs(next-adaptiveDpr)>.01){adaptiveDpr=next;setQuality()}}qualityClock=0;qualityFrames=0}if(document.hidden)return;
+ if(owner){while(elapsed>0){const dt=Math.min(.05,elapsed);simulate(dt);elapsed-=dt}}
+ updCam();if(!webglLost)ren.render(scene,cam)}
 function simulate(dt){tm+=dt;updateOrders(dt);if(S.used>0){S.usedTimer=(S.usedTimer||0)+dt;if(S.usedTimer>=40){S.usedTimer=0;S.used--;S.money+=2600;S.rev+=2600;S.profit+=800;S.sold++;recordIncome('cars',800);addXP(10+2600/150);sales.push([performance.now(),800]);toast('Đã bán xe cũ: lãi $800');save()}}
  if(S.training>0){S.training=Math.max(0,S.training-dt);if(S.training===0&&S.trainingPending){S.train=Math.min(12,S.train+1);S.trainingPending=false;toast('Đào tạo hoàn tất!');save()}}
  if(S.mkt>0)S.mkt=Math.max(0,S.mkt-dt);

@@ -33,10 +33,37 @@ S.displayData=Array.isArray(S.displayData)?S.displayData.slice(0,6):[];
 S.stats=Object.fromEntries(['cars','garage','test','offline'].map(k=>[k,Math.max(0,Number(S.stats?.[k])||0)]));
 S.history=Array.isArray(S.history)?S.history.filter(x=>x&&Number.isFinite(x.hour)&&Number.isFinite(x.profit)).slice(-24):[];
 S.quality=['auto','eco','high'].includes(S.quality)?S.quality:'auto';
+const LOCK_KEY='aet6-owner',LOCK_TTL=12000;
 const tabId=Date.now().toString(36)+Math.random().toString(36).slice(2);
-let owner=true,storageOK=true;
-function ownSave(){try{const lease=JSON.parse(localStorage.getItem('aet6-owner')||'null');return !lease||lease.id===tabId||Date.now()-lease.at>15000}catch(e){return true}}
-function lease(){if(!ownSave()){owner=false;return}try{localStorage.setItem('aet6-owner',JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}}
+let owner=true,storageOK=true,lockModalShown=false;
+function readLease(){
+ try{
+  const l=JSON.parse(localStorage.getItem(LOCK_KEY)||'null');
+  return (l&&typeof l==='object'&&typeof l.id==='string'&&Number.isFinite(Number(l.at)))?{id:l.id,at:Number(l.at)}:null;
+ }catch(e){return null}
+}
+function ownSave(){
+ const l=readLease(),now=Date.now();
+ return !l||l.id===tabId||now-l.at>LOCK_TTL||l.at>now+2000;
+}
+function lease(){
+ if(!ownSave()){owner=false;return false}
+ owner=true;
+ if(lockModalShown&&typeof $==='function'&&$('modal')){
+  lockModalShown=false;
+  $('modal').style.display='none';
+ }
+ try{localStorage.setItem(LOCK_KEY,JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}
+ return true;
+}
+function releaseLease(){
+ try{const l=readLease();if(l&&l.id===tabId)localStorage.removeItem(LOCK_KEY)}catch(e){}
+}
+function claimTabLock(){
+ owner=true;lockModalShown=false;
+ try{localStorage.setItem(LOCK_KEY,JSON.stringify({id:tabId,at:Date.now()}))}catch(e){storageOK=false}
+ if(typeof $==='function'&&$('modal'))$('modal').style.display='none';
+}
 lease();
 function market(k){const i=KS.indexOf(k),epoch=Math.floor(Date.now()/600000);return {buy:1+.035*Math.sin(epoch*1.71+i*2),sell:1+.055*Math.sin(epoch*.83+i*1.9),demand:1+.2*Math.sin(epoch*.83+i*1.9)}}
 function choosePreferred(keys){let n=R()*keys.reduce((a,k)=>a+market(k).demand,0);for(const k of keys){n-=market(k).demand;if(n<=0)return k}return keys[0]}
