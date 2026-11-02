@@ -4,7 +4,7 @@ let v11DemoClock=0,v11DemoCrowd=[],v11DemoTier=null;
 function v11SetPreviewTier(level){
  v11DemoTier=level;
  showroomLevelTwo.visible=level>=2;
- showroomLevelThree.visible=level>=3;if(typeof u2!=='undefined')u2.visible=level>=2;if(typeof u3!=='undefined')u3.visible=level>=3;if(typeof wing!=='undefined')wing.visible=level>=2;if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);
+ showroomLevelThree.visible=level>=3;if(typeof u2!=='undefined')u2.visible=level>=2;if(typeof u3!=='undefined')u3.visible=level>=3;if(typeof wing!=='undefined')wing.visible=level>=2;if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);if(typeof updateGrandHorizonV15==='function')updateGrandHorizonV15(0);
  const status=document.getElementById('preview-status');
  if(status)status.textContent='Xem showroom cấp '+level+' · Không lưu';
 }
@@ -24,7 +24,7 @@ function v11PreviewCrowd(){
 function v11ClearPreview(){
  v11DemoCrowd.forEach(a=>{const mixer=a.m.userData.characterMixer;if(mixer){mixer.stopAllAction();mixer.uncacheRoot(a.m.userData.characterVisual)}});
  v11DemoRoot.clear();v11DemoCrowd=[];
- v11DemoTier=null;applyVis();if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);
+ v11DemoTier=null;applyVis();if(typeof updateGrandDealershipV13==='function')updateGrandDealershipV13(0);if(typeof updateGrandShowroomV14==='function')updateGrandShowroomV14(0);if(typeof updateGrandHorizonV15==='function')updateGrandHorizonV15(0);
  const status=document.getElementById('preview-status');
  if(status)status.textContent='Đã về cảnh thật · Tiến trình an toàn';
 }

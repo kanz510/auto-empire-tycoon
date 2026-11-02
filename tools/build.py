@@ -1,7 +1,7 @@
 from pathlib import Path
 import hashlib,json,shutil
 r=Path(__file__).resolve().parents[1]
-order=['models','save-state','graphics','visual-v9','assets-3d','characters-v11','showroom-v11','preview-v11','city-v12','grand-v13','grand-v14','economy','gameplay','ai','ui','main','lifecycle']
+order=['models','save-state','graphics','visual-v9','assets-3d','characters-v11','showroom-v11','preview-v11','city-v12','grand-v13','grand-v14','grand-v15','economy','gameplay','ai','ui','main','lifecycle']
 digest=lambda b:hashlib.sha256(b).hexdigest()[:16]
 read_utf8=lambda p:p.read_text(encoding='utf-8').replace('\r\n','\n')
 write_utf8=lambda p,s:p.write_text(s,encoding='utf-8',newline='\n')
