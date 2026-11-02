@@ -66,14 +66,14 @@ function grandV14Sign(group,title,subtitle,width,x,y,z){
   gb(g,.13,.035,2.0,G.champagne,x,.17,5.05);
  }
  // Brand sign mounted high on the rear flagship wall facing the camera
- grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13.5,0,6.45,-10.9);
+ grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13.5,0,6.45,-10.32);
 }
 // Tier 2: Right-wing Premium Gallery backdrop & colonnade
 {
  const g=tier(2);
  gb(g,17,.28,19,G.ivory,24.4,.22,-4.7);
  gb(g,17.7,.45,2.2,G.navy,24.4,5.15,-11.4);
- gb(g,17.5,.11,.15,G.champagne,24.4,4.92,-10.25);
+ gb(g,17.5,.11,.15,G.champagne,24.4,4.92,-10.55);
  for(const x of [16.4,19.2,22,24.8,27.6,30.4,32.2]){
   gb(g,.16,4.5,.2,G.champagne,x,2.65,-11.1);
  }
@@ -85,14 +85,15 @@ function grandV14Sign(group,title,subtitle,width,x,y,z){
   gb(g,.38,5.2,.38,G.navy,x,2.8,-13.2);
  }
  gb(g,13,.16,2.5,G.pavement,24.4,.13,7.3);
- grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.6,24.4,6.45,-10.85);
+ grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.6,24.4,6.45,-10.32);
 }
 // Tier 3: Flagship rear crown, golden arch & rooftop gardens (behind the cars at z = -11.4)
 {
  const g=tier(3);
+ gb(g,54.4,2.85,1.5,G.navy,5.6,6.55,-11.55);
  gb(g,55,.38,2.0,G.dark,5.6,8.12,-11.5);
- gb(g,54.7,.12,.16,G.champagne,5.6,8.0,-10.45);
- gb(g,54.7,.10,.15,G.champagne,5.6,8.36,-10.45);
+ gb(g,54.7,.12,.16,G.champagne,5.6,8.0,-10.55);
+ gb(g,54.7,.10,.15,G.champagne,5.6,8.36,-10.55);
  for(const x of [-21.1,-15.4,-9.7,-4,1.7,7.4,13.1,18.8,24.5,30.2]){
   gb(g,.18,2.6,.18,G.champagne,x,6.7,-11.2);
  }
@@ -120,11 +121,12 @@ if(typeof wingSign!=='undefined')wingSign.visible=false;
 if(typeof signFrame!=='undefined')signFrame.visible=false;
 if(typeof signText!=='undefined')signText.visible=false;
 if(typeof showroomV11!=='undefined')showroomV11.visible=false;
+if(typeof bb!=='undefined')bb.visible=false;
 if(typeof sh!=='undefined')sh.children.forEach(c=>{if(c.position.z>1.5&&c.position.y>1.5)c.visible=false});
 if(typeof showroomPremium!=='undefined')showroomPremium.children.forEach(c=>{if(c.isMesh&&c.position.z>1.5&&c.position.y>1.5)c.visible=false});
 if(typeof showroomLevelTwo!=='undefined')showroomLevelTwo.children.forEach(c=>{if(c.isMesh&&c.position.z>1&&c.position.y>2)c.visible=false});
 if(typeof showroomLevelThree!=='undefined')showroomLevelThree.children.forEach(c=>{if(c.position.z>1.5)c.visible=false});
-if(typeof grandV13!=='undefined')grandV13.root.traverse(c=>{if(c.isMesh&&c.position.z>1.8&&c.position.y>1.8)c.visible=false});
+if(typeof grandV13!=='undefined')grandV13.root.traverse(c=>{if(c.isMesh&&((c.position.z>1.8&&c.position.y>1.8)||c.geometry?.type==='TubeGeometry'))c.visible=false});
 
 function updateGrandShowroomV14(dt){
  grandV14.clock+=Math.max(0,Math.min(.05,dt));

@@ -51,12 +51,21 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
    const nightMode=empireV16.nightLights.visible&&S.timeMode==='night';
    S.timeMode='day';updateAtmosphere(0);
 
+   // 6. Spatial separation: VIP auction podium must never overlap customer parking or turntables
+   const podPos=empireV16.auctionPod.position;
+   const minParkDist=Math.min(...PX.map(x=>Math.hypot(podPos.x-x,podPos.z-7)));
+   const minTurntableDist=Math.min(...SP.map(([x,z])=>Math.hypot(podPos.x-x,podPos.z-z)));
+   const backRowSeparation=Math.hypot(slots[4].ax-slots[5].ax,slots[4].az-slots[5].az);
+   let visibleV13Tubes=0;
+   grandV13.root.traverse(c=>{if(c.isMesh&&c.geometry?.type==='TubeGeometry'&&c.visible)visibleV13Tubes++});
+
    return {
     hadContract,contractCompleted,
     prestige:S.prestige,basePrice,afterPrestigePrice,
     tuningStage:S.tuning[0],afterTunePrice,paintedHex,ringVisible,
     auctionActive,auctionFinished,
     sunsetNightLights,nightMode,
+    minParkDist,minTurntableDist,backRowSeparation,visibleV13Tubes,
     bannerText:$('mb').textContent
    };
   });
@@ -72,7 +81,11 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   assert.equal(out.auctionActive,true,'Starting VIP auction must spawn 3D hypercar podium');
   assert.equal(out.auctionFinished,true,'Completed VIP auction must pay out profit and increment auctionsWon');
   assert.ok(out.sunsetNightLights&&out.nightMode,'Sunset and Night modes must activate 3D neon lights');
-  assert.match(out.bannerText,/Hợp đồng #2/,'HUD mission bar must display active dynamic contract');
+  assert.ok(out.minParkDist>12,'VIP Auction podium must not overlap customer parking spots');
+  assert.ok(out.minTurntableDist>4,'VIP Auction podium must not overlap showroom turntables');
+  assert.ok(out.backRowSeparation>4,'Back-row customer/staff consultation spots must not overlap');
+  assert.equal(out.visibleV13Tubes,0,'Legacy V13 front arch tube must remain hidden in cutaway view');
+  assert.match(out.bannerText,/HĐ #2/,'HUD mission bar must display active dynamic contract');
 
   // Verify UI panels render the new V16 cards cleanly
   await page.locator('[data-o="show"]').tap();

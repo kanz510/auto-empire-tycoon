@@ -72,17 +72,17 @@ SP.forEach((p,i)=>{
  empireV16.tuningRings.push({group:g,outer,inner});
 });
 
-// 2. 3D VIP Auction Display Podium on the Front Plaza
+// 2. 3D VIP Auction Display Podium inside the Showroom VIP Corner (back-right, z = -8.5)
 {
  const podMat=new THREE.MeshStandardMaterial({color:0x142634,metalness:.65,roughness:.22});
  podMat.color.convertSRGBToLinear();
  const goldMat=new THREE.MeshStandardMaterial({color:0xffd54f,metalness:.85,roughness:.18});
  goldMat.color.convertSRGBToLinear();
- const base=new THREE.Mesh(new THREE.CylinderGeometry(2.25,2.4,.28,28),podMat);
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(1.92,2.05,.24,28),podMat);
  base.receiveShadow=true;empireV16.auctionPod.add(base);
- const ring=new THREE.Mesh(new THREE.TorusGeometry(2.28,.06,8,36),new THREE.MeshBasicMaterial({color:0xffdf9a}));
- ring.rotation.x=Math.PI/2;ring.position.y=.15;empireV16.auctionPod.add(ring);
- empireV16.auctionPod.position.set(-5.6,.18,4.6);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.96,.055,8,36),new THREE.MeshBasicMaterial({color:0xffdf9a}));
+ ring.rotation.x=Math.PI/2;ring.position.y=.13;empireV16.auctionPod.add(ring);
+ empireV16.auctionPod.position.set(9,.32,-8.5);
  empireV16.auctionPod.visible=false;
 }
 
@@ -322,10 +322,10 @@ function ensureContract(){
  if(S.contract&&typeof S.contract.target==='number')return S.contract;
  const n=S.contractsDone||0,typeIdx=n%4;
  const specs=[
-  {key:'sold',step:6+Math.min(24,n*2),label:d=>`Hợp đồng #${n+1}: Bán thêm ${d} xe`,r:12000+n*4500,gems:4},
-  {key:'vip',step:2+Math.min(8,Math.floor(n/2)),label:d=>`Hợp đồng #${n+1}: Phục vụ thêm ${d} khách VIP`,r:15000+n*5000,gems:5},
-  {key:'service',step:4+Math.min(16,n*2),label:d=>`Hợp đồng #${n+1}: Hoàn tất ${d} lượt Lái thử / Sửa xe`,r:14000+n*4500,gems:4},
-  {key:'empire',step:1+Math.min(4,Math.floor(n/3)),label:d=>`Hợp đồng #${n+1}: Đấu giá VIP hoặc Độ thêm ${d} cấp`,r:22000+n*6500,gems:6}
+  {key:'sold',step:6+Math.min(24,n*2),label:d=>`HĐ #${n+1}: Bán thêm ${d} xe`,r:12000+n*4500,gems:4},
+  {key:'vip',step:2+Math.min(8,Math.floor(n/2)),label:d=>`HĐ #${n+1}: Phục vụ ${d} khách VIP`,r:15000+n*5000,gems:5},
+  {key:'service',step:4+Math.min(16,n*2),label:d=>`HĐ #${n+1}: ${d} lượt Lái thử / Sửa xe`,r:14000+n*4500,gems:4},
+  {key:'empire',step:1+Math.min(4,Math.floor(n/3)),label:d=>`HĐ #${n+1}: Đấu giá / Độ xe +${d} cấp`,r:22000+n*6500,gems:6}
  ];
  const sp=specs[typeIdx],curVal=contractMetric(sp.key);
  S.contract={id:n+1,key:sp.key,start:curVal,target:curVal+sp.step,title:sp.label(sp.step),r:sp.r,gems:sp.gems};
@@ -454,11 +454,32 @@ hud=function(){
  }
 };
 
+function preventVehicleOverlap(){
+ // Keep eastbound vehicles on the main road (z ≈ 12.5) spaced by at least 4.6m
+ const laneCars=[];
+ for(const c of custs){
+  if(!c.dead&&c.car&&Math.abs(c.car.position.z-12.5)<1.1&&(c.st==='SPAWNING'||(c.st==='LEAVING'&&c.dr))){
+   laneCars.push(c.car);
+  }
+ }
+ if(gj&&gj.m&&Math.abs(gj.m.position.z-12.5)<1.1)laneCars.push(gj.m);
+ if(laneCars.length>1){
+  laneCars.sort((a,b)=>b.position.x-a.position.x);
+  for(let i=1;i<laneCars.length;i++){
+   const ahead=laneCars[i-1],behind=laneCars[i];
+   if(ahead.position.x-behind.position.x<4.6){
+    behind.position.x=ahead.position.x-4.6;
+   }
+  }
+ }
+}
+
 function updateEmpireV16(dt){
  const step=Math.max(0,Math.min(.05,dt));
  updateAtmosphere(step);
  updateAuction(step);
  checkContract();
+ preventVehicleOverlap();
  empireV16.tuningRings.forEach((r,i)=>{
   const lv=S.tuning[i]||0;
   r.group.visible=i<NSL()&&lv>0;

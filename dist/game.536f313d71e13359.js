@@ -1024,14 +1024,14 @@ function grandV14Sign(group,title,subtitle,width,x,y,z){
   gb(g,.13,.035,2.0,G.champagne,x,.17,5.05);
  }
  // Brand sign mounted high on the rear flagship wall facing the camera
- grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13.5,0,6.45,-10.9);
+ grandV14Sign(g,'AUTO EMPIRE','PREMIUM MOTOR GALLERY',13.5,0,6.45,-10.32);
 }
 // Tier 2: Right-wing Premium Gallery backdrop & colonnade
 {
  const g=tier(2);
  gb(g,17,.28,19,G.ivory,24.4,.22,-4.7);
  gb(g,17.7,.45,2.2,G.navy,24.4,5.15,-11.4);
- gb(g,17.5,.11,.15,G.champagne,24.4,4.92,-10.25);
+ gb(g,17.5,.11,.15,G.champagne,24.4,4.92,-10.55);
  for(const x of [16.4,19.2,22,24.8,27.6,30.4,32.2]){
   gb(g,.16,4.5,.2,G.champagne,x,2.65,-11.1);
  }
@@ -1043,14 +1043,15 @@ function grandV14Sign(group,title,subtitle,width,x,y,z){
   gb(g,.38,5.2,.38,G.navy,x,2.8,-13.2);
  }
  gb(g,13,.16,2.5,G.pavement,24.4,.13,7.3);
- grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.6,24.4,6.45,-10.85);
+ grandV14Sign(g,'PREMIUM','LUXURY VEHICLE COLLECTION',10.6,24.4,6.45,-10.32);
 }
 // Tier 3: Flagship rear crown, golden arch & rooftop gardens (behind the cars at z = -11.4)
 {
  const g=tier(3);
+ gb(g,54.4,2.85,1.5,G.navy,5.6,6.55,-11.55);
  gb(g,55,.38,2.0,G.dark,5.6,8.12,-11.5);
- gb(g,54.7,.12,.16,G.champagne,5.6,8.0,-10.45);
- gb(g,54.7,.10,.15,G.champagne,5.6,8.36,-10.45);
+ gb(g,54.7,.12,.16,G.champagne,5.6,8.0,-10.55);
+ gb(g,54.7,.10,.15,G.champagne,5.6,8.36,-10.55);
  for(const x of [-21.1,-15.4,-9.7,-4,1.7,7.4,13.1,18.8,24.5,30.2]){
   gb(g,.18,2.6,.18,G.champagne,x,6.7,-11.2);
  }
@@ -1078,11 +1079,12 @@ if(typeof wingSign!=='undefined')wingSign.visible=false;
 if(typeof signFrame!=='undefined')signFrame.visible=false;
 if(typeof signText!=='undefined')signText.visible=false;
 if(typeof showroomV11!=='undefined')showroomV11.visible=false;
+if(typeof bb!=='undefined')bb.visible=false;
 if(typeof sh!=='undefined')sh.children.forEach(c=>{if(c.position.z>1.5&&c.position.y>1.5)c.visible=false});
 if(typeof showroomPremium!=='undefined')showroomPremium.children.forEach(c=>{if(c.isMesh&&c.position.z>1.5&&c.position.y>1.5)c.visible=false});
 if(typeof showroomLevelTwo!=='undefined')showroomLevelTwo.children.forEach(c=>{if(c.isMesh&&c.position.z>1&&c.position.y>2)c.visible=false});
 if(typeof showroomLevelThree!=='undefined')showroomLevelThree.children.forEach(c=>{if(c.position.z>1.5)c.visible=false});
-if(typeof grandV13!=='undefined')grandV13.root.traverse(c=>{if(c.isMesh&&c.position.z>1.8&&c.position.y>1.8)c.visible=false});
+if(typeof grandV13!=='undefined')grandV13.root.traverse(c=>{if(c.isMesh&&((c.position.z>1.8&&c.position.y>1.8)||c.geometry?.type==='TubeGeometry'))c.visible=false});
 
 function updateGrandShowroomV14(dt){
  grandV14.clock+=Math.max(0,Math.min(.05,dt));
@@ -1331,7 +1333,7 @@ const MIS=[{t:'Bán 5 xe',k:'sold',n:5,r:1000},{t:'Nhập thêm 3 xe vào kho',k
 const MV=()=>({sold:S.sold,bought:S.bought,show:S.show,vip:S.vip,mktN:S.mktN,staff:S.staff,rep:S.rep,td:S.td,gar:S.gar});
 function chkMis(){while(S.mi<MIS.length&&MV()[MIS[S.mi].k]>=MIS[S.mi].n){const m=MIS[S.mi++];S.money+=m.r;S.gems+=2;popup('Hoàn thành nhiệm vụ!',m.t+'<br>Thưởng: <b>'+fm(m.r)+'</b> + 2 KC');beep(523,.1);setTimeout(()=>beep(784,.1),100);setTimeout(()=>beep(1046,.25),200)}}
 // ---------- xe trưng bày
-const slots=SP.map((p,i)=>{const r2=i>=4,sg=Math.sign(p[0]);return{x:p[0],z:p[1],car:null,t:0,res:null,mesh:null,sc:1,cons:false,ax:r2?sg*.5:p[0],az:r2?-8.5:-2.2,sx:r2?-sg*.5:p[0]+1.2,r2}});
+const slots=SP.map((p,i)=>{const r2=i>=4;return{x:p[0],z:p[1],car:null,t:0,res:null,mesh:null,sc:1,cons:false,ax:r2?p[0]-.55:p[0],az:r2?-6.2:-2.2,sx:r2?p[0]+.65:p[0]+1.2,r2}});
 function mount(d,k,cons){d.basis=d.nextBasis||CARS[k].cost;d.nextBasis=0;d.car=k;d.cons=cons;d.mesh=makeCar(k);d.mesh.position.set(d.x,.45,d.z);d.sc=.05;d.mesh.scale.setScalar(.05);scene.add(d.mesh)}
 function restock(d){let k=null,cons=false;const un=KS.filter(x=>CARS[x].lv<=S.show),st=un.filter(x=>S.inv[x]>0);
  if(st.length){k=st[(S.sold+slots.filter(x=>x.car).length)%st.length];d.nextBasis=S.basis[k];S.inv[k]--}
@@ -1346,7 +1348,9 @@ function follow(o,sp,dt,car){if(!o.path.length){o.mv=false;return true}const m=o
  m.position.x+=dx/d*st;m.position.z+=dz/d*st;m.rotation.y=ang(m.rotation.y,car?Math.atan2(-dz,dx):Math.atan2(dx,dz),dt*8);if(car&&m.wheels)m.wheels.forEach(w=>w.userData.kenneyWheel?(w.rotation.x+=st/.38):(w.rotation.z-=st/.38));o.mv=true;return false}
 const face=(m,x,z)=>{m.rotation.y=Math.atan2(x-m.position.x,z-m.position.z)};
 const custs=[],pk=[0,0,0,0,0,0],staff=[];let ctrC=null,spawnT=1.5,warnT=0;
-function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]);if(!free.length)return;const pi=free[R()*free.length|0];pk[pi]=1;
+function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]&&!custs.some(c=>c.car&&Math.hypot(c.car.position.x-PX[i],c.car.position.z-7)<3.6));if(!free.length)return;
+ if(custs.some(c=>c.car&&Math.abs(c.car.position.z-12.5)<1.5&&c.car.position.x<-28)||(gj&&gj.m&&Math.abs(gj.m.position.z-12.5)<1.5&&gj.m.position.x<-28))return;
+ const pi=free[R()*free.length|0];pk[pi]=1;
  const k=['hatch','sedan','suv'][R()*3|0],m=makeCar(k,[0xe53935,0x8e24aa,0x00acc1,0xfdd835,0xeeeeee,0x3949ab][R()*6|0]),vip=R()<.08+S.rep/600,un=KS.filter(x=>CARS[x].lv<=S.show);
  m.position.set(-36,0,12.5);scene.add(m);
  custs.push({st:'SPAWNING',pi,sx:PX[pi],car:m,m,path:[[PX[pi],12.5]],vip,pref:choosePreferred(un),bud:(3500+R()*8000*S.show*S.show)*(1+S.rep/200)*(vip?2.5:1),w:0,t:0,ph:R()*6,age:0})}
@@ -1368,7 +1372,7 @@ function updC(c,dt){const kk=c.st+(c.sub||'');if(kk!==c.k){c.k=kk;c.age=0}else c
   else if(follow(c,2.6,dt)){c.st='WAITING';c.w=0;c.sub='';c.per.dot.visible=true;c.per.dot.material.color.set(0xffeb3b)}break;
  case'WAITING':c.w+=dt;if(c.w>65){addRep(-2);S.satisfaction=S.satisfaction*.95+1.5;forceLeave(c)}break;
  case'BUYING':if(c.sub=='toC')follow(c,2.6,dt);c.act=c.sub=='serve'||c.sub=='pay';break;
- case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1)pk[c.pi]=0;if(follow(c,8,dt,1)){removeActor(c.car);c.dead=1}}}}
+ case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1&&c.car.position.x>c.sx+4.5)pk[c.pi]=0;if(follow(c,8,dt,1)){pk[c.pi]=0;removeActor(c.car);c.dead=1}}}}
 function ensureMech(){if(S.gar>0&&!mech){mech=person(0xff7043);mech.position.set(-20.6,0,-1.5);mech.rotation.y=-Math.PI/2;scene.add(mech)}}
 function updG(dt){if(S.gar<1)return;ensureMech();
  if(!gj){gT-=dt;if(gT<=0){const bc=Math.round(1200+R()*600);if(S.money>=bc){S.money-=bc;const m=makeCar(['hatch','sedan','suv'][R()*3|0],0x8d6e63);m.position.set(-36,0,12.5);scene.add(m);gj={m,st:'IN',path:[[-23,12.5],[-23,-1.5]],bc,t:0,age:0}}else gT=5}return}
@@ -1515,17 +1519,17 @@ SP.forEach((p,i)=>{
  empireV16.tuningRings.push({group:g,outer,inner});
 });
 
-// 2. 3D VIP Auction Display Podium on the Front Plaza
+// 2. 3D VIP Auction Display Podium inside the Showroom VIP Corner (back-right, z = -8.5)
 {
  const podMat=new THREE.MeshStandardMaterial({color:0x142634,metalness:.65,roughness:.22});
  podMat.color.convertSRGBToLinear();
  const goldMat=new THREE.MeshStandardMaterial({color:0xffd54f,metalness:.85,roughness:.18});
  goldMat.color.convertSRGBToLinear();
- const base=new THREE.Mesh(new THREE.CylinderGeometry(2.25,2.4,.28,28),podMat);
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(1.92,2.05,.24,28),podMat);
  base.receiveShadow=true;empireV16.auctionPod.add(base);
- const ring=new THREE.Mesh(new THREE.TorusGeometry(2.28,.06,8,36),new THREE.MeshBasicMaterial({color:0xffdf9a}));
- ring.rotation.x=Math.PI/2;ring.position.y=.15;empireV16.auctionPod.add(ring);
- empireV16.auctionPod.position.set(-5.6,.18,4.6);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.96,.055,8,36),new THREE.MeshBasicMaterial({color:0xffdf9a}));
+ ring.rotation.x=Math.PI/2;ring.position.y=.13;empireV16.auctionPod.add(ring);
+ empireV16.auctionPod.position.set(9,.32,-8.5);
  empireV16.auctionPod.visible=false;
 }
 
@@ -1765,10 +1769,10 @@ function ensureContract(){
  if(S.contract&&typeof S.contract.target==='number')return S.contract;
  const n=S.contractsDone||0,typeIdx=n%4;
  const specs=[
-  {key:'sold',step:6+Math.min(24,n*2),label:d=>`Hợp đồng #${n+1}: Bán thêm ${d} xe`,r:12000+n*4500,gems:4},
-  {key:'vip',step:2+Math.min(8,Math.floor(n/2)),label:d=>`Hợp đồng #${n+1}: Phục vụ thêm ${d} khách VIP`,r:15000+n*5000,gems:5},
-  {key:'service',step:4+Math.min(16,n*2),label:d=>`Hợp đồng #${n+1}: Hoàn tất ${d} lượt Lái thử / Sửa xe`,r:14000+n*4500,gems:4},
-  {key:'empire',step:1+Math.min(4,Math.floor(n/3)),label:d=>`Hợp đồng #${n+1}: Đấu giá VIP hoặc Độ thêm ${d} cấp`,r:22000+n*6500,gems:6}
+  {key:'sold',step:6+Math.min(24,n*2),label:d=>`HĐ #${n+1}: Bán thêm ${d} xe`,r:12000+n*4500,gems:4},
+  {key:'vip',step:2+Math.min(8,Math.floor(n/2)),label:d=>`HĐ #${n+1}: Phục vụ ${d} khách VIP`,r:15000+n*5000,gems:5},
+  {key:'service',step:4+Math.min(16,n*2),label:d=>`HĐ #${n+1}: ${d} lượt Lái thử / Sửa xe`,r:14000+n*4500,gems:4},
+  {key:'empire',step:1+Math.min(4,Math.floor(n/3)),label:d=>`HĐ #${n+1}: Đấu giá / Độ xe +${d} cấp`,r:22000+n*6500,gems:6}
  ];
  const sp=specs[typeIdx],curVal=contractMetric(sp.key);
  S.contract={id:n+1,key:sp.key,start:curVal,target:curVal+sp.step,title:sp.label(sp.step),r:sp.r,gems:sp.gems};
@@ -1897,11 +1901,32 @@ hud=function(){
  }
 };
 
+function preventVehicleOverlap(){
+ // Keep eastbound vehicles on the main road (z ≈ 12.5) spaced by at least 4.6m
+ const laneCars=[];
+ for(const c of custs){
+  if(!c.dead&&c.car&&Math.abs(c.car.position.z-12.5)<1.1&&(c.st==='SPAWNING'||(c.st==='LEAVING'&&c.dr))){
+   laneCars.push(c.car);
+  }
+ }
+ if(gj&&gj.m&&Math.abs(gj.m.position.z-12.5)<1.1)laneCars.push(gj.m);
+ if(laneCars.length>1){
+  laneCars.sort((a,b)=>b.position.x-a.position.x);
+  for(let i=1;i<laneCars.length;i++){
+   const ahead=laneCars[i-1],behind=laneCars[i];
+   if(ahead.position.x-behind.position.x<4.6){
+    behind.position.x=ahead.position.x-4.6;
+   }
+  }
+ }
+}
+
 function updateEmpireV16(dt){
  const step=Math.max(0,Math.min(.05,dt));
  updateAtmosphere(step);
  updateAuction(step);
  checkContract();
+ preventVehicleOverlap();
  empireV16.tuningRings.forEach((r,i)=>{
   const lv=S.tuning[i]||0;
   r.group.visible=i<NSL()&&lv>0;

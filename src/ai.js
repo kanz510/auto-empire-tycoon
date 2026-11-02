@@ -5,7 +5,9 @@ function follow(o,sp,dt,car){if(!o.path.length){o.mv=false;return true}const m=o
  m.position.x+=dx/d*st;m.position.z+=dz/d*st;m.rotation.y=ang(m.rotation.y,car?Math.atan2(-dz,dx):Math.atan2(dx,dz),dt*8);if(car&&m.wheels)m.wheels.forEach(w=>w.userData.kenneyWheel?(w.rotation.x+=st/.38):(w.rotation.z-=st/.38));o.mv=true;return false}
 const face=(m,x,z)=>{m.rotation.y=Math.atan2(x-m.position.x,z-m.position.z)};
 const custs=[],pk=[0,0,0,0,0,0],staff=[];let ctrC=null,spawnT=1.5,warnT=0;
-function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]);if(!free.length)return;const pi=free[R()*free.length|0];pk[pi]=1;
+function spawn(){const free=[...Array(NPK()).keys()].filter(i=>!pk[i]&&!custs.some(c=>c.car&&Math.hypot(c.car.position.x-PX[i],c.car.position.z-7)<3.6));if(!free.length)return;
+ if(custs.some(c=>c.car&&Math.abs(c.car.position.z-12.5)<1.5&&c.car.position.x<-28)||(gj&&gj.m&&Math.abs(gj.m.position.z-12.5)<1.5&&gj.m.position.x<-28))return;
+ const pi=free[R()*free.length|0];pk[pi]=1;
  const k=['hatch','sedan','suv'][R()*3|0],m=makeCar(k,[0xe53935,0x8e24aa,0x00acc1,0xfdd835,0xeeeeee,0x3949ab][R()*6|0]),vip=R()<.08+S.rep/600,un=KS.filter(x=>CARS[x].lv<=S.show);
  m.position.set(-36,0,12.5);scene.add(m);
  custs.push({st:'SPAWNING',pi,sx:PX[pi],car:m,m,path:[[PX[pi],12.5]],vip,pref:choosePreferred(un),bud:(3500+R()*8000*S.show*S.show)*(1+S.rep/200)*(vip?2.5:1),w:0,t:0,ph:R()*6,age:0})}
@@ -27,7 +29,7 @@ function updC(c,dt){const kk=c.st+(c.sub||'');if(kk!==c.k){c.k=kk;c.age=0}else c
   else if(follow(c,2.6,dt)){c.st='WAITING';c.w=0;c.sub='';c.per.dot.visible=true;c.per.dot.material.color.set(0xffeb3b)}break;
  case'WAITING':c.w+=dt;if(c.w>65){addRep(-2);S.satisfaction=S.satisfaction*.95+1.5;forceLeave(c)}break;
  case'BUYING':if(c.sub=='toC')follow(c,2.6,dt);c.act=c.sub=='serve'||c.sub=='pay';break;
- case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1)pk[c.pi]=0;if(follow(c,8,dt,1)){removeActor(c.car);c.dead=1}}}}
+ case'LEAVING':if(!c.dr){if(follow(c,2.6,dt)){removeActor(c.per);c.m=c.car;c.path=[[c.sx,12.5],[42,12.5]];c.dr=1}}else{if(c.path.length==1&&c.car.position.x>c.sx+4.5)pk[c.pi]=0;if(follow(c,8,dt,1)){pk[c.pi]=0;removeActor(c.car);c.dead=1}}}}
 function ensureMech(){if(S.gar>0&&!mech){mech=person(0xff7043);mech.position.set(-20.6,0,-1.5);mech.rotation.y=-Math.PI/2;scene.add(mech)}}
 function updG(dt){if(S.gar<1)return;ensureMech();
  if(!gj){gT-=dt;if(gT<=0){const bc=Math.round(1200+R()*600);if(S.money>=bc){S.money-=bc;const m=makeCar(['hatch','sedan','suv'][R()*3|0],0x8d6e63);m.position.set(-36,0,12.5);scene.add(m);gj={m,st:'IN',path:[[-23,12.5],[-23,-1.5]],bc,t:0,age:0}}else gT=5}return}
