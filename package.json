@@ -3,7 +3,7 @@
   "private": true,
   "version": "14.0.0",
   "scripts": {
-    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs && node tests/characters-v11.cjs && node tests/fix-v11-1.cjs && node tests/visual-v11-2.cjs && node tests/living-city-v12.cjs && node tests/physical-polish-v12.cjs && node tests/grand-dealership-v13.cjs && node tests/grand-showroom-v14.cjs && node tests/grand-horizon-v15.cjs",
+    "test": "node tests/smoke.cjs && node tests/polish.cjs && node tests/visual-focus.cjs && node tests/showroom-alive.cjs && node tests/asset-models.cjs && node tests/characters-v11.cjs && node tests/fix-v11-1.cjs && node tests/visual-v11-2.cjs && node tests/living-city-v12.cjs && node tests/physical-polish-v12.cjs && node tests/grand-dealership-v13.cjs && node tests/grand-showroom-v14.cjs && node tests/grand-horizon-v15.cjs && node tests/empire-v16.cjs",
     "build": "python tools/build.py"
   },
   "devDependencies": {
