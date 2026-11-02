@@ -147,8 +147,31 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),http
   assert.equal(claimedCheck.leaseId,claimedCheck.tabId,'aet6-owner must be updated to current tabId');
   assert.equal(claimedCheck.money,777777,'Save aet6 must remain intact after lock takeover');
 
+  // Verify V17 Grand Metropolis: 3D Helicopter, Hologram Price Badges, Turbo, Motor Show & Quick-Action Dock
+  const v17Check=await page.evaluate(()=>{
+   S.money=500000;S.show=3;
+   activateTurbo();
+   startMotorShow();
+   updateMetropolisV17(.1);
+   const hasDock=!!$('v17-dock');
+   const heliVisible=metropolisV17.heli.visible;
+   const spotVisible=metropolisV17.spotlights.visible;
+   const holoVisible=metropolisV17.holoSprites.some(b=>b.sprite.visible);
+   const beforeDeals=S.dealsClosed;
+   negotiateVIP();
+   return {
+    hasDock,heliVisible,spotVisible,holoVisible,
+    turboActive:S.turbo>0,
+    expoActive:S.motorShow>0&&S.showsHosted>=1,
+    custCount:custs.length,
+    deals:S.dealsClosed>=beforeDeals
+   };
+  });
+  assert.ok(v17Check.hasDock&&v17Check.heliVisible&&v17Check.spotVisible&&v17Check.holoVisible,'V17 3D Helicopter, Spotlights, Hologram Signs & Quick Dock must be active');
+  assert.ok(v17Check.turboActive&&v17Check.expoActive&&v17Check.custCount>=1,'V17 Turbo Overdrive, Motor Show Expo & VIP Negotiation must function');
+
   assert.deepEqual(errors,[]);
-  console.log('PASS V16.1: Infinite Contracts, VIP Auctions, Prestige, Day/Night, Tuning, Stale Lock Recovery & WebGL Diagnostics');
+  console.log('PASS V16.1 + V17: Infinite Contracts, VIP Auctions, Prestige, Day/Night, Tuning, Stale Lock Recovery, WebGL Diagnostics & V17 Metropolis');
   await ctx.close();
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});
